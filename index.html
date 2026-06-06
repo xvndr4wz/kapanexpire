@@ -60,9 +60,7 @@ body::before {
 }
 .brand-title { font-size:1.1rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
 .brand-sub { font-family:var(--mono); font-size:.65rem; color:var(--text-secondary); margin-top:2px; }
-
 .btn-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
-
 .refresh-btn {
   font-family:var(--mono); font-size:.72rem; font-weight:500; letter-spacing:.04em;
   background:transparent; border:1px solid var(--border); color:var(--text-secondary);
@@ -71,18 +69,15 @@ body::before {
 }
 .refresh-btn:hover { border-color:var(--accent-blue); color:var(--accent-blue); background:rgba(77,159,255,.05); }
 .refresh-btn:disabled { opacity:.4; cursor:not-allowed; }
-
-/* webhook status indicator */
 .webhook-indicator {
   font-family:var(--mono); font-size:.62rem; padding:6px 12px; border-radius:6px;
   border:1px solid var(--border); background:var(--surface); color:var(--text-muted);
   display:flex; align-items:center; gap:6px;
 }
 .wh-dot { width:6px; height:6px; border-radius:50%; background:var(--text-muted); flex-shrink:0; }
-.wh-dot.ok  { background:var(--accent-green); box-shadow:0 0 5px var(--accent-green); }
-.wh-dot.err { background:var(--accent-red); }
+.wh-dot.ok      { background:var(--accent-green); box-shadow:0 0 5px var(--accent-green); }
+.wh-dot.err     { background:var(--accent-red); }
 .wh-dot.sending { background:var(--accent-yellow); animation:pulse-dot 1s infinite; }
-
 .spin { animation:spin 1s linear infinite; display:inline-block; }
 @keyframes spin { to { transform:rotate(360deg); } }
 
@@ -102,7 +97,7 @@ body::before {
 /* UPTIME */
 .uptime-bar {
   background:var(--surface); border:1px solid var(--border); border-radius:10px;
-  padding:12px 20px; margin-bottom:32px;
+  padding:12px 20px; margin-bottom:28px;
   display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
 }
 .uptime-label { font-family:var(--mono); font-size:.65rem; color:var(--text-muted); letter-spacing:.06em; }
@@ -122,20 +117,23 @@ body::before {
   font-family:var(--mono); font-size:.62rem; color:var(--text-muted);
   letter-spacing:.06em; display:flex; justify-content:space-between; align-items:center;
 }
-.alert-log-body { max-height:120px; overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+.alert-log-body {
+  max-height:140px; overflow-y:auto;
+  scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+}
 .alert-log-body::-webkit-scrollbar { width:3px; }
 .alert-log-body::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
 .alert-entry {
   padding:8px 16px; border-bottom:1px solid var(--border-soft);
-  font-family:var(--mono); font-size:.62rem; display:flex; gap:12px; align-items:baseline;
+  font-family:var(--mono); font-size:.62rem; display:flex; gap:12px; align-items:baseline; flex-wrap:wrap;
 }
 .alert-entry:last-child { border-bottom:none; }
-.alert-time { color:var(--text-muted); flex-shrink:0; }
-.alert-name { color:var(--accent-red); font-weight:500; }
-.alert-url  { color:var(--text-secondary); word-break:break-all; }
-.alert-sent { color:var(--accent-green); flex-shrink:0; }
-.alert-fail { color:var(--accent-yellow); flex-shrink:0; }
-.log-empty  { padding:12px 16px; font-family:var(--mono); font-size:.62rem; color:var(--text-muted); }
+.alert-time  { color:var(--text-muted); flex-shrink:0; }
+.alert-name  { color:var(--accent-red); font-weight:500; flex-shrink:0; }
+.alert-url   { color:var(--text-secondary); word-break:break-all; flex:1; }
+.alert-sent  { color:var(--accent-green); flex-shrink:0; }
+.alert-fail  { color:var(--accent-yellow); flex-shrink:0; }
+.log-empty   { padding:12px 16px; font-family:var(--mono); font-size:.62rem; color:var(--text-muted); }
 
 /* GRID */
 .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:12px; }
@@ -149,7 +147,6 @@ body::before {
 .card.is-valid    { border-left:2px solid var(--accent-green); }
 .card.is-invalid  { border-left:2px solid var(--accent-red); }
 .card.is-checking { border-left:2px solid var(--text-muted); }
-
 .card-top {
   display:flex; align-items:center; justify-content:space-between;
   padding:13px 16px; border-bottom:1px solid var(--border-soft);
@@ -159,14 +156,12 @@ body::before {
 .pill.valid    { background:rgba(0,214,143,.1);  color:var(--accent-green); }
 .pill.invalid  { background:rgba(255,77,106,.1); color:var(--accent-red); }
 .pill.checking { background:rgba(92,100,128,.15); color:var(--text-secondary); }
-
 .card-url {
   padding:8px 16px; border-bottom:1px solid var(--border-soft);
   font-family:var(--mono); font-size:.62rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
 }
 .card-url a { color:var(--accent-blue); text-decoration:none; opacity:.7; transition:opacity .15s; }
 .card-url a:hover { opacity:1; }
-
 .card-preview {
   padding:12px 16px; font-family:var(--mono); font-size:.62rem; line-height:1.55;
   color:var(--text-secondary); min-height:72px; max-height:120px; overflow-y:auto;
@@ -175,39 +170,33 @@ body::before {
 }
 .card-preview::-webkit-scrollbar { width:3px; }
 .card-preview::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
-
 .shimmer {
   background:linear-gradient(90deg,var(--surface) 25%,var(--surface2) 50%,var(--surface) 75%);
   background-size:200% 100%; animation:shimmer 1.2s infinite; height:56px; border-radius:6px;
 }
 @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
 .card-foot {
   display:flex; align-items:center; justify-content:space-between;
   padding:9px 16px; border-top:1px solid var(--border-soft); gap:8px; flex-wrap:wrap;
 }
 .card-foot-left { display:flex; flex-direction:column; gap:3px; }
 .foot-time { font-family:var(--mono); font-size:.58rem; color:var(--text-muted); }
-
 .badge { display:inline-block; font-family:var(--mono); font-size:.58rem; padding:2px 8px; border-radius:3px; margin-top:2px; }
 .badge.green  { background:rgba(0,214,143,.08);  color:var(--accent-green); }
 .badge.yellow { background:rgba(245,197,66,.08); color:var(--accent-yellow); }
 .badge.red    { background:rgba(255,77,106,.08); color:var(--accent-red); }
 .badge.gray   { background:rgba(92,100,128,.1);  color:var(--text-secondary); }
-
 .http-tag {
   font-family:var(--mono); font-size:.6rem; padding:3px 10px; border-radius:4px;
   background:var(--surface2); color:var(--text-muted); border:1px solid var(--border);
   white-space:nowrap; flex-shrink:0;
 }
-
 .page-footer { text-align:center; margin-top:56px; font-family:var(--mono); font-size:.62rem; color:var(--text-muted); letter-spacing:.04em; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-  <!-- HEADER -->
   <div class="topbar">
     <div class="brand">
       <div class="brand-dot"></div>
@@ -217,7 +206,7 @@ body::before {
       </div>
     </div>
     <div class="btn-row">
-      <div class="webhook-indicator" id="whIndicator">
+      <div class="webhook-indicator">
         <span class="wh-dot" id="whDot"></span>
         <span id="whStatus">webhook standby</span>
       </div>
@@ -227,7 +216,6 @@ body::before {
     </div>
   </div>
 
-  <!-- STATS -->
   <div class="stats-strip">
     <div class="stat-cell">
       <span class="stat-label">total link</span>
@@ -247,16 +235,14 @@ body::before {
     </div>
   </div>
 
-  <!-- UPTIME -->
   <div class="uptime-bar">
     <span class="uptime-label">↑ sejak 6 Juni 2026 · 17:30:46 WIB</span>
     <span class="uptime-val" id="uptimeVal">--</span>
   </div>
 
-  <!-- ALERT LOG -->
   <div class="alert-log">
     <div class="alert-log-head">
-      <span>📋 log notifikasi webhook</span>
+      <span>📋 log notifikasi discord</span>
       <span id="alertCount" style="color:var(--accent-red);">0 alert</span>
     </div>
     <div class="alert-log-body" id="alertLogBody">
@@ -264,184 +250,138 @@ body::before {
     </div>
   </div>
 
-  <!-- CARDS -->
   <div class="grid" id="cardsGrid"></div>
 
-  <div class="page-footer">pulse · raw paste monitor · webhook discord · tab harus terbuka agar auto-check berjalan</div>
+  <div class="page-footer">pulse · raw paste monitor · auto-check tiap 5 menit · discord webhook</div>
 </div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────────────────────────
+// ─── PASTE LIST ───────────────────────────────────────────────────────────────
 const PASTE_LIST = [
-  { name: "NEKOID.CC",    rawUrl: "https://pb.nekoid.cc/uCbr" },
-  { name: "PASTE.EE",     rawUrl: "https://paste.ee/r/jDq3THqM" },
-  { name: "RUBIS",        rawUrl: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
-  { name: "PASTEFY",      rawUrl: "https://pastefy.app/8uNFL4QZ/raw" },
-  { name: "PASTE.RS",     rawUrl: "https://paste.rs/gInQ0" },
-  { name: "PASTEBIN",     rawUrl: "https://pastebin.com/raw/inZGNrT4" },
-  { name: "MYST",         rawUrl: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4" },
-  { name: "BASEDBIN",     rawUrl: "https://basedbin.fly.dev/sTIYAV" },
-  { name: "DPASTE",       rawUrl: "https://dpaste.com/CYSYJERKM.txt" },
-  { name: "HST.SH",       rawUrl: "https://hst.sh/raw/iqahiluzev" },
-  { name: "HASTE.ZNEIX",  rawUrl: "https://haste.zneix.eu/raw/opytesucux" },
-  { name: "SOURCEB.IN",   rawUrl: "https://cdn.sourceb.in/bins/hw37mRWTu1/0" },
-  { name: "P.IP.FI",      rawUrl: "https://p.ip.fi/2JWL.txt" },
-  { name: "TEST",         rawUrl: "https://pastefy.app/ExZW8o4g/raw" },
+  { name: "NEKOID.CC",   rawUrl: "https://pb.nekoid.cc/uCbr" },
+  { name: "PASTE.EE",    rawUrl: "https://paste.ee/r/jDq3THqM" },
+  { name: "RUBIS",       rawUrl: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
+  { name: "PASTEFY",     rawUrl: "https://pastefy.app/8uNFL4QZ/raw" },
+  { name: "PASTE.RS",    rawUrl: "https://paste.rs/gInQ0" },
+  { name: "PASTEBIN",    rawUrl: "https://pastebin.com/raw/inZGNrT4" },
+  { name: "MYST",        rawUrl: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4" },
+  { name: "BASEDBIN",    rawUrl: "https://basedbin.fly.dev/sTIYAV" },
+  { name: "DPASTE",      rawUrl: "https://dpaste.com/CYSYJERKM.txt" },
+  { name: "HST.SH",      rawUrl: "https://hst.sh/raw/iqahiluzev" },
+  { name: "HASTE.ZNEIX", rawUrl: "https://haste.zneix.eu/raw/opytesucux" },
+  { name: "SOURCEB.IN",  rawUrl: "https://cdn.sourceb.in/bins/hw37mRWTu1/0" },
+  { name: "P.IP.FI",     rawUrl: "https://p.ip.fi/2JWL.txt" },
+  { name: "TEST",        rawUrl: "https://pastefy.app/ExZW8o4g/raw" },
 ];
 
-// Ganti dengan webhook baru setelah regenerate di Discord!
+// ⚠️ Ganti dengan webhook baru setelah regenerate di Discord
 const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1512798536364982362/x6ARE3230z9wcqCwdAAQ_iEEdBLFQRUkUDSf21OQVqXRlVvTdTmaUEZP6FLQBZL1fpuF";
 
-const START_DATE  = new Date("2026-06-06T17:30:46+07:00");
-const TIMEOUT_MS  = 14000;
-const AUTO_INTERVAL_MS = 5 * 60 * 1000; // cek tiap 5 menit
+const START_DATE       = new Date("2026-06-06T17:30:46+07:00");
+const TIMEOUT_MS       = 14000;
+const AUTO_INTERVAL_MS = 5 * 60 * 1000; // 5 menit
 
-// ─── PROXY ────────────────────────────────────────────────────────────────────
-function buildProxyChain(rawUrl) {
-  const enc = encodeURIComponent(rawUrl);
-  return [
-    { url: `https://corsproxy.io/?${enc}`,                     headers: { "x-requested-with": "XMLHttpRequest" } },
-    { url: `https://api.allorigins.win/raw?url=${enc}`,        headers: {} },
-    { url: `https://thingproxy.freeboard.io/fetch/${rawUrl}`,  headers: {} },
-    { url: `https://corsproxy.io/?url=${enc}`,                 headers: { "Cache-Control": "no-cache" } },
-  ];
-}
-
-async function tryFetch(proxyUrl, extraHeaders = {}) {
-  const ctrl = new AbortController();
-  const tid  = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+// ─── FETCH (sama persis seperti sebelumnya yang sudah work) ───────────────────
+async function fetchRawWithProxy(rawUrl) {
+  const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
   try {
-    const res = await fetch(proxyUrl, {
-      signal: ctrl.signal,
-      headers: { "Cache-Control": "no-cache, no-store", ...extraHeaders }
+    const controller = new AbortController();
+    const timeoutId  = setTimeout(() => controller.abort(), TIMEOUT_MS);
+    const response   = await fetch(proxyUrl, {
+      method: "GET",
+      signal: controller.signal,
+      headers: {
+        "Cache-Control": "no-cache, no-store",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+      }
     });
-    clearTimeout(tid);
-    if (!res.ok) return { ok: false, status: res.status, content: null };
-    return { ok: true, status: res.status, content: await res.text() };
-  } catch(e) {
-    clearTimeout(tid);
-    return { ok: false, status: 0, content: null, error: e.name === 'AbortError' ? 'Timeout' : e.message };
+    clearTimeout(timeoutId);
+    if (!response.ok) return { ok: false, status: response.status, content: null, error: `HTTP ${response.status}` };
+    const text = await response.text();
+    return { ok: true, status: response.status, content: text, error: null };
+  } catch(err) {
+    let msg = err.name === 'AbortError' ? "Timeout (14s)" : err.message;
+    return { ok: false, status: 0, content: null, error: msg };
   }
-}
-
-async function fetchWithFallback(rawUrl) {
-  const chain = buildProxyChain(rawUrl);
-  let lastErr = null;
-  for (let i = 0; i < chain.length; i++) {
-    const res = await tryFetch(chain[i].url, chain[i].headers);
-    if (res.ok && res.content !== null) return res;
-    if (res.status === 404) return { ok: false, status: 404, content: null, error: 'HTTP 404' };
-    lastErr = res;
-    if (i < chain.length - 1) await new Promise(r => setTimeout(r, 300));
-  }
-  return { ok: false, status: lastErr?.status || 0, content: null, error: lastErr?.error || `HTTP ${lastErr?.status}` };
 }
 
 // ─── DISCORD WEBHOOK ──────────────────────────────────────────────────────────
-// Track pastes yang sudah dikirim notif agar tidak double-notif
+// Set berisi nama paste yang sudah dikirimi notif supaya tidak double kirim
 const notifiedInvalid = new Set();
 const alertLog = [];
 
-async function sendWebhook(paste, expiredAt, httpCode) {
+async function sendDiscordWebhook(paste, expiredAt, httpCode) {
+  setWhStatus('sending', 'mengirim ke Discord…');
+
   const timeStr = expiredAt.toLocaleString('id-ID', {
     day: '2-digit', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit', second: '2-digit',
     hour12: false, timeZone: 'Asia/Jakarta'
   });
 
-  setWhStatus('sending', `mengirim ke Discord…`);
-
   const payload = {
     username: "Pulse Monitor",
-    avatar_url: "https://i.imgur.com/4M34hi2.png",
     embeds: [{
       title: "🔴 Paste Expired / Hilang",
       color: 0xff4d6a,
       fields: [
-        {
-          name: "📌 Nama",
-          value: `\`${paste.name}\``,
-          inline: true
-        },
-        {
-          name: "🌐 HTTP Status",
-          value: `\`${httpCode || 'ERR'}\``,
-          inline: true
-        },
-        {
-          name: "🕒 Waktu Expired",
-          value: `\`${timeStr} WIB\``,
-          inline: false
-        },
-        {
-          name: "🔗 Link RAW",
-          value: paste.rawUrl,
-          inline: false
-        }
+        { name: "📌 Nama",         value: `\`${paste.name}\``,          inline: true  },
+        { name: "🌐 HTTP Status",  value: `\`${httpCode || 'ERR'}\``,   inline: true  },
+        { name: "🕒 Waktu Expired",value: `\`${timeStr} WIB\``,         inline: false },
+        { name: "🔗 Link RAW",     value: paste.rawUrl,                  inline: false }
       ],
-      footer: { text: "Pulse Monitor · Deteksi CREATED AT" },
+      footer: { text: "Pulse Monitor · auto-check tiap 5 menit" },
       timestamp: expiredAt.toISOString()
     }]
   };
 
   try {
-    const res = await fetch(DISCORD_WEBHOOK, {
-      method: 'POST',
+    const res     = await fetch(DISCORD_WEBHOOK, {
+      method:  'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body:    JSON.stringify(payload)
     });
-
-    const success = res.ok || res.status === 204;
-    addAlertLog(paste, expiredAt, success, httpCode);
+    // Discord kirim 204 No Content kalau sukses
+    const success = res.status === 204 || res.ok;
+    pushAlertLog(paste, expiredAt, httpCode, success);
     setWhStatus(success ? 'ok' : 'err', success ? 'terkirim ✓' : `gagal (${res.status})`);
-    setTimeout(() => setWhStatus('standby', 'webhook standby'), 4000);
-    return success;
   } catch(e) {
-    addAlertLog(paste, expiredAt, false, httpCode);
+    pushAlertLog(paste, expiredAt, httpCode, false);
     setWhStatus('err', 'gagal kirim');
-    setTimeout(() => setWhStatus('standby', 'webhook standby'), 4000);
-    return false;
   }
+
+  setTimeout(() => setWhStatus('standby', 'webhook standby'), 4000);
 }
 
 function setWhStatus(state, text) {
   const dot = document.getElementById('whDot');
   const lbl = document.getElementById('whStatus');
-  dot.className = 'wh-dot';
-  if (state === 'ok')      dot.classList.add('ok');
-  else if (state === 'err') dot.classList.add('err');
-  else if (state === 'sending') dot.classList.add('sending');
+  dot.className = 'wh-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : state === 'sending' ? ' sending' : '');
   lbl.textContent = text;
 }
 
-function addAlertLog(paste, expiredAt, sent, httpCode) {
-  const entry = { paste, expiredAt, sent, httpCode, ts: new Date() };
-  alertLog.unshift(entry);
+function pushAlertLog(paste, expiredAt, httpCode, sent) {
+  alertLog.unshift({ paste, expiredAt, httpCode, sent });
   renderAlertLog();
 }
 
 function renderAlertLog() {
-  const body = document.getElementById('alertLogBody');
+  const body  = document.getElementById('alertLogBody');
   const count = document.getElementById('alertCount');
   count.textContent = `${alertLog.length} alert`;
-
-  if (alertLog.length === 0) {
+  if (!alertLog.length) {
     body.innerHTML = `<div class="log-empty">belum ada notifikasi terkirim.</div>`;
     return;
   }
-
   body.innerHTML = alertLog.map(e => {
     const t = e.expiredAt.toLocaleString('id-ID', {
       day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
     });
-    const sentHtml = e.sent
-      ? `<span class="alert-sent">✓ terkirim</span>`
-      : `<span class="alert-fail">✗ gagal</span>`;
     return `<div class="alert-entry">
       <span class="alert-time">${t}</span>
       <span class="alert-name">${escH(e.paste.name)}</span>
-      <span class="alert-url">${trunc(e.paste.rawUrl, 55)}</span>
-      ${sentHtml}
+      <span class="alert-url">${trunc(e.paste.rawUrl, 50)}</span>
+      ${e.sent ? '<span class="alert-sent">✓ terkirim</span>' : '<span class="alert-fail">✗ gagal</span>'}
     </div>`;
   }).join('');
 }
@@ -456,73 +396,67 @@ for (const p of PASTE_LIST) {
   });
 }
 
-function hasCreatedAt(content) {
+function hasCreatedAtKeyword(content) {
   return content ? content.toUpperCase().includes("CREATED AT") : false;
 }
 
-function makeSnippet(content, hasCA) {
-  if (!content) return '(kosong / tidak bisa fetch)';
-  const s = content.length > 200
-    ? content.slice(0, 200).replace(/\n/g, ' ↵ ') + '…'
-    : content.replace(/\n/g, ' ↵ ');
-  return hasCA ? `✓ "CREATED AT" terdeteksi\n${s}` : `✗ tidak ada "CREATED AT"\n${s}`;
+function getPreview(content, hasCreatedAt) {
+  if (!content) return "(kosong / tidak bisa fetch)";
+  const snippet = content.length > 180
+    ? content.substring(0, 180).replace(/\n/g, '↵ ') + "…"
+    : content.replace(/\n/g, '↵ ');
+  return hasCreatedAt
+    ? `✅ DITEMUKAN "CREATED AT" — ${snippet}`
+    : `❌ TIDAK ADA "CREATED AT" — ${snippet}`;
 }
 
 // ─── CHECK ALL ────────────────────────────────────────────────────────────────
-async function checkAll() {
-  // Reset ke checking
+async function checkAllPastes() {
   for (const p of PASTE_LIST) {
     const old = store.get(p.name);
-    store.set(p.name, { ...old, status: 'checking', snippet: null, errorMsg: null });
+    store.set(p.name, { ...old, status: 'checking', snippet: null, errorMsg: null, lastCheck: new Date() });
   }
   render();
 
-  const tasks = PASTE_LIST.map(async (paste) => {
-    const result  = await fetchWithFallback(paste.rawUrl);
-    const now     = new Date();
-    const hasCA   = result.ok && result.content ? hasCreatedAt(result.content) : false;
-    const isValid = hasCA && result.ok;
-
-    const old       = store.get(paste.name);
-    const wasValid  = old?.status === 'valid';
-    const lastValid = isValid ? now : (old?.lastValid || null);
+  const promises = PASTE_LIST.map(async (paste) => {
+    const result    = await fetchRawWithProxy(paste.rawUrl);
+    const nowTime   = new Date();
+    const hasCA     = result.ok && result.content ? hasCreatedAtKeyword(result.content) : false;
+    const isValid   = hasCA && result.ok;
+    const oldData   = store.get(paste.name);
+    const wasValid  = oldData?.status === 'valid';
+    const lastValid = isValid ? nowTime : (oldData?.lastValid || null);
 
     store.set(paste.name, {
       status:       isValid ? 'valid' : 'invalid',
-      httpCode:     result.status || 0,
+      httpCode:     result.ok ? result.status : (result.status || 0),
       snippet:      result.ok && result.content
-                      ? makeSnippet(result.content, hasCA)
-                      : `✗ gagal: ${result.error || `HTTP ${result.status}`}`,
+                      ? getPreview(result.content, hasCA)
+                      : `❌ GAGAL FETCH: ${result.error || `HTTP ${result.status}`}`,
       hasCreatedAt: hasCA,
-      errorMsg:     !isValid
-                      ? (result.error || (!hasCA && result.ok ? 'tidak ada "CREATED AT"' : `HTTP ${result.status}`))
-                      : null,
+      errorMsg:     !result.ok ? (result.error || `HTTP ${result.status}`) : (isValid ? null : "Konten tidak mengandung 'CREATED AT'"),
       lastValid,
-      firstSeen:    old?.firstSeen || now,
-      lastCheck:    now
+      firstSeen:    oldData?.firstSeen || nowTime,
+      lastCheck:    nowTime
     });
 
-    // Kirim webhook jika baru saja berubah valid → invalid
-    // dan belum pernah dinotif untuk sesi invalid ini
+    // Kirim webhook hanya saat transisi valid → invalid, satu kali per sesi
     if (wasValid && !isValid && !notifiedInvalid.has(paste.name)) {
       notifiedInvalid.add(paste.name);
-      sendWebhook(paste, now, result.status || 0);
+      sendDiscordWebhook(paste, nowTime, result.status || 0);
     }
-
-    // Reset notif tracker jika kembali valid
-    if (isValid && notifiedInvalid.has(paste.name)) {
-      notifiedInvalid.delete(paste.name);
-    }
+    // Reset tracker kalau kembali valid
+    if (isValid) notifiedInvalid.delete(paste.name);
 
     render();
   });
 
-  await Promise.all(tasks);
+  await Promise.all(promises);
   document.getElementById('lastCheckTime').textContent = new Date().toLocaleTimeString('id-ID');
 }
 
-// ─── AUTO CHECK ───────────────────────────────────────────────────────────────
-setInterval(checkAll, AUTO_INTERVAL_MS);
+// Auto-check tiap 5 menit (selama tab terbuka)
+setInterval(checkAllPastes, AUTO_INTERVAL_MS);
 
 // ─── RENDER ───────────────────────────────────────────────────────────────────
 function render() {
@@ -540,7 +474,6 @@ function render() {
   for (const paste of PASTE_LIST) {
     const d = store.get(paste.name);
     if (!d) continue;
-
     const isValid    = d.status === 'valid';
     const isChecking = d.status === 'checking';
     const cardClass  = isChecking ? 'is-checking' : isValid ? 'is-valid' : 'is-invalid';
@@ -592,8 +525,7 @@ function updateUptime() {
   const h = Math.floor((sec % 86400) / 3600);
   const m = Math.floor((sec % 3600) / 60);
   const s = Math.floor(sec % 60);
-  let out = '';
-  if (d > 0) out += `${d}d `;
+  let out = d > 0 ? `${d}d ` : '';
   out += `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
   document.getElementById('uptimeVal').textContent = out;
 }
@@ -621,13 +553,13 @@ function escH(s) {
   return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-// ─── REFRESH BUTTON ───────────────────────────────────────────────────────────
+// ─── BUTTON ───────────────────────────────────────────────────────────────────
 const btn = document.getElementById('refreshBtn');
 const ico = document.getElementById('refreshIcon');
 btn.addEventListener('click', async () => {
   btn.disabled = true;
   ico.classList.add('spin');
-  await checkAll();
+  await checkAllPastes();
   ico.classList.remove('spin');
   btn.disabled = false;
 });
@@ -635,7 +567,7 @@ btn.addEventListener('click', async () => {
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 render();
 renderAlertLog();
-checkAll();
+checkAllPastes();
 </script>
 </body>
 </html>
