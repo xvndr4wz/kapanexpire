@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Upload Monitor Dashboard</title>
+<style>
+body{
+    margin:0;
+    background:#0b0f19;
+    color:#e5e7eb;
+    font-family:Arial, sans-serif;
+}
+.container{
+    padding:20px;
+    max-width:1100px;
+    margin:auto;
+}
+.header{
+    text-align:center;
+    margin-bottom:20px;
+}
+.card{
+    background:#111827;
+    padding:15px;
+    margin:10px 0;
+    border-radius:10px;
+    border:1px solid #1f2937;
+}
+.ok{color:#22c55e;}
+.bad{color:#ef4444;}
+.warn{color:#f59e0b;}
+.small{font-size:12px;color:#9ca3af;}
+.grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+a{color:#60a5fa;text-decoration:none;}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="header">
+<h2>UPLOAD MONITOR DASHBOARD</h2>
+<div id="timeLive"></div>
+<div id="uptime"></div>
+</div>
+
+<div id="list"></div>
+</div>
+
+<script>
+const startTime = new Date("2026-06-06T17:30:46+07:00");
+
+const links = [
+{n:"NEKOID.CC", url:"https://pb.nekoid.cc/uCbr"},
+{n:"PASTE.EE VIEW", url:"https://paste.ee/p/jDq3THqM"},
+{n:"PASTE.EE RAW", url:"https://paste.ee/r/jDq3THqM"},
+{n:"RUBIS VIEW", url:"https://rubis.app/view/?scrap=TdrQo24Kat2JpHz2"},
+{n:"RUBIS RAW", url:"https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw"},
+{n:"PASTEFY", url:"https://pastefy.app/8uNFL4QZ/raw"},
+{n:"PASTE.RS", url:"https://paste.rs/gInQ0"},
+{n:"PASTEBIN", url:"https://pastebin.com/raw/inZGNrT4"},
+{n:"MYST", url:"https://paste.myst.rs/raw/xg15v6li/xf6jevi4"},
+{n:"BASEDBIN", url:"https://basedbin.fly.dev/sTIYAV"},
+{n:"DPASTE", url:"https://dpaste.com/CYSYJERKM.txt"},
+{n:"PASTE-BIN.XYZ", url:"https://paste-bin.xyz/raw/NRE5c667"},
+{n:"HST.SH", url:"https://hst.sh/raw/iqahiluzev"},
+{n:"HASTE.ZNEIX", url:"https://haste.zneix.eu/raw/opytesucux"},
+{n:"SOURCEB.IN", url:"https://cdn.sourceb.in/bins/hw37mRWTu1/0"},
+{n:"P.IP.FI", url:"https://p.ip.fi/2JWL.txt"}
+];
+
+function formatTime(sec){
+    let min = sec/60;
+    let hr = sec/3600;
+    let day = sec/86400;
+    let month = day/30;
+    let year = day/365;
+
+    return `
+    ${sec.toFixed(0)} detik |
+    ${min.toFixed(2)} menit |
+    ${hr.toFixed(2)} jam |
+    ${day.toFixed(2)} hari |
+    ${month.toFixed(2)} bulan |
+    ${year.toFixed(2)} tahun
+    `;
+}
+
+async function check(url){
+    try{
+        let res = await fetch(url,{method:"GET",mode:"no-cors"});
+        return "UNKNOWN (CORS)";
+    }catch(e){
+        return "DEAD / ERROR";
+    }
+}
+
+function render(){
+    let now = new Date();
+    let diff = (now - startTime)/1000;
+
+    document.getElementById("timeLive").innerHTML =
+        "LIVE: " + now.toLocaleString();
+
+    document.getElementById("uptime").innerHTML =
+        "UPTIME: " + formatTime(diff);
+
+    let html = "";
+
+    links.forEach(l=>{
+        html += `
+        <div class="card">
+            <b>${l.n}</b><br>
+            <a href="${l.url}" target="_blank">${l.url}</a>
+            <div class="small">status: checking...</div>
+        </div>`;
+    });
+
+    document.getElementById("list").innerHTML = html;
+}
+
+render();
+setInterval(render,1000);
+</script>
+
+</body>
+</html>
