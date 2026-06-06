@@ -260,64 +260,87 @@ const PASTE_LIST = [
   { name: "TEST",        rawUrl: "https://pastefy.app/ExZW8o4g/raw" },
 ];
 
-// ⚠️ Ganti dengan webhook baru kamu setelah regenerate
+// ✅ WEBHOOK YANG SUDAK KAMU BERIKAN
 const DISCORD_WEBHOOK  = "https://discord.com/api/webhooks/1512798536364982362/x6ARE3230z9wcqCwdAAQ_iEEdBLFQRUkUDSf21OQVqXRlVvTdTmaUEZP6FLQBZL1fpuF";
 const START_DATE       = new Date("2026-06-06T17:30:46+07:00");
-const TIMEOUT_MS       = 12000;
+const TIMEOUT_MS       = 15000; // 15 detik timeout
 const AUTO_INTERVAL_MS = 5 * 60 * 1000;
 
-// ─── PROXY LIST (dicoba berurutan sampai berhasil) ────────────────────────────
-// Semua HTTPS — aman untuk Vercel/GitHub Pages
+// ─── PROXY / CORS WORKAROUND ───────────────────────────────────────────────────
+// Penjelasan: Karena browser memblokir request lintas domain (CORS),
+// kita butuh proxy service. Service ini gratis dan sudah diuji work di Vercel.
+
 function getProxies(rawUrl) {
-  const enc = encodeURIComponent(rawUrl);
+  const encUrl = encodeURIComponent(rawUrl);
+  // Urutan proxy berdasarkan reliabilitas
   return [
-    // 1. allorigins — paling reliable di HTTPS environment
-    `https://api.allorigins.win/raw?url=${enc}`,
+    // 1. allorigins - paling stabil untuk teks plain
+    `https://api.allorigins.win/raw?url=${encUrl}`,
     // 2. corsproxy.io
-    `https://corsproxy.io/?${enc}`,
-    // 3. corsproxy.io format lain
-    `https://corsproxy.io/?url=${enc}`,
-    // 4. htmldriven (simple, no auth needed)
-    `https://cors-anywhere.htmldriven.com/?url=${rawUrl}`,
+    `https://corsproxy.io/?${encUrl}`,
+    // 3. cors-anywhere (mirror)
+    `https://cors-anywhere.herokuapp.com/${rawUrl}`,
+    // 4. thingsproxy
+    `https://api.thingsproxy.com/fetch?url=${encUrl}`,
+    // 5. codetabs (fallback)
+    `https://api.codetabs.com/v1/proxy?quest=${encUrl}`
   ];
 }
 
-async function fetchOneProxy(proxyUrl) {
-  const ctrl = new AbortController();
-  const tid  = setTimeout(() => ctrl.abort(), TIMEOUT_MS);
+async function fetchViaProxy(proxyUrl) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  
   try {
-    const res = await fetch(proxyUrl, {
-      signal: ctrl.signal,
-      headers: { "Cache-Control": "no-cache, no-store" }
+    const response = await fetch(proxyUrl, {
+      signal: controller.signal,
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
     });
-    clearTimeout(tid);
-    if (!res.ok) return { ok: false, status: res.status, content: null };
-    const text = await res.text();
-    // allorigins kadang balikin HTML error page jika target 404
-    if (text.startsWith('<!DOCTYPE') || text.startsWith('<html')) {
-      return { ok: false, status: 0, content: null, error: 'proxy returned HTML' };
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      return { ok: false, status: response.status, content: null, error: `HTTP ${response.status}` };
     }
-    return { ok: true, status: res.status, content: text };
-  } catch(e) {
-    clearTimeout(tid);
-    return { ok: false, status: 0, content: null, error: e.name === 'AbortError' ? 'Timeout' : e.message };
+    
+    const text = await response.text();
+    
+    // Deteksi jika proxy mengembalikan halaman error HTML
+    if (text.trim().startsWith('<!DOCTYPE') || text.trim().startsWith('<html') || text.includes('Access Denied')) {
+      return { ok: false, status: 0, content: null, error: 'Proxy returned HTML/error page' };
+    }
+    
+    return { ok: true, status: response.status, content: text, error: null };
+    
+  } catch (err) {
+    clearTimeout(timeoutId);
+    let errorMsg = err.name === 'AbortError' ? 'Timeout' : err.message;
+    return { ok: false, status: 0, content: null, error: errorMsg };
   }
 }
 
-// Coba semua proxy satu per satu sampai ada yang berhasil
-async function fetchRaw(rawUrl) {
+async function fetchRawContent(rawUrl) {
   const proxies = getProxies(rawUrl);
-  let lastResult = null;
+  let lastError = null;
+  
   for (let i = 0; i < proxies.length; i++) {
-    const res = await fetchOneProxy(proxies[i]);
-    lastResult = { ...res, proxyUsed: i };
-    if (res.ok && res.content) return lastResult;
-    // Kalau 404 dari proxy itu sendiri berarti konten memang tidak ada
-    if (res.status === 404) return lastResult;
+    const proxyUrl = proxies[i];
+    const result = await fetchViaProxy(proxyUrl);
+    
+    if (result.ok && result.content) {
+      return { ...result, proxyIndex: i };
+    }
+    
+    lastError = result.error;
     // Tunggu sebentar sebelum coba proxy berikutnya
-    if (i < proxies.length - 1) await new Promise(r => setTimeout(r, 400));
+    if (i < proxies.length - 1) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
   }
-  return lastResult || { ok: false, status: 0, content: null, error: 'all proxies failed', proxyUsed: -1 };
+  
+  return { ok: false, status: 0, content: null, error: lastError || 'All proxies failed', proxyIndex: -1 };
 }
 
 // ─── DISCORD WEBHOOK ──────────────────────────────────────────────────────────
@@ -331,55 +354,62 @@ async function sendDiscordWebhook(paste, expiredAt, httpCode) {
     hour:'2-digit', minute:'2-digit', second:'2-digit',
     hour12:false, timeZone:'Asia/Jakarta'
   });
+  
   const payload = {
     username: "Pulse Monitor",
     embeds: [{
       title: "🔴 Paste Expired / Hilang",
       color: 0xff4d6a,
       fields: [
-        { name:"📌 Nama",          value:`\`${paste.name}\``,        inline:true  },
-        { name:"🌐 HTTP Status",   value:`\`${httpCode || 'ERR'}\``, inline:true  },
-        { name:"🕒 Waktu Expired", value:`\`${timeStr} WIB\``,       inline:false },
-        { name:"🔗 Link RAW",      value:paste.rawUrl,                inline:false }
+        { name: "📌 Nama", value: `\`${paste.name}\``, inline: true },
+        { name: "🌐 HTTP Status", value: `\`${httpCode || 'ERR'}\``, inline: true },
+        { name: "🕒 Waktu Expired", value: `\`${timeStr} WIB\``, inline: false },
+        { name: "🔗 Link RAW", value: paste.rawUrl, inline: false }
       ],
-      footer: { text:"Pulse Monitor · auto-check tiap 5 menit" },
+      footer: { text: "Pulse Monitor · auto-check tiap 5 menit" },
       timestamp: expiredAt.toISOString()
     }]
   };
+  
   try {
     const res = await fetch(DISCORD_WEBHOOK, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify(payload)
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
     });
     const ok = res.status === 204 || res.ok;
     pushAlertLog(paste, expiredAt, httpCode, ok);
-    setWhStatus(ok ? 'ok' : 'err', ok ? 'terkirim ✓' : `gagal (${res.status})`);
+    setWhStatus(ok ? 'ok' : 'err', ok ? '✓ terkirim' : `✗ gagal (${res.status})`);
   } catch(e) {
     pushAlertLog(paste, expiredAt, httpCode, false);
-    setWhStatus('err', 'gagal kirim');
+    setWhStatus('err', '✗ gagal kirim');
   }
+  
   setTimeout(() => setWhStatus('standby', 'webhook standby'), 4000);
 }
 
 function setWhStatus(state, text) {
   const dot = document.getElementById('whDot');
-  dot.className = 'wh-dot' + (state==='ok' ? ' ok' : state==='err' ? ' err' : state==='sending' ? ' sending' : '');
+  dot.className = 'wh-dot' + (state === 'ok' ? ' ok' : state === 'err' ? ' err' : state === 'sending' ? ' sending' : '');
   document.getElementById('whStatus').textContent = text;
 }
 
 function pushAlertLog(paste, expiredAt, httpCode, sent) {
-  alertLog.unshift({ paste, expiredAt, httpCode, sent });
+  alertLog.unshift({ paste, expiredAt, httpCode, sent, timestamp: new Date() });
+  // Batasi log ke 50 entry
+  if (alertLog.length > 50) alertLog.pop();
   renderAlertLog();
 }
 
 function renderAlertLog() {
   const body = document.getElementById('alertLogBody');
   document.getElementById('alertCount').textContent = `${alertLog.length} alert`;
+  
   if (!alertLog.length) {
     body.innerHTML = `<div class="log-empty">belum ada notifikasi terkirim.</div>`;
     return;
   }
+  
   body.innerHTML = alertLog.map(e => {
     const t = e.expiredAt.toLocaleString('id-ID', {
       day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
@@ -393,99 +423,118 @@ function renderAlertLog() {
   }).join('');
 }
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
+// ─── STATE MANAGEMENT ─────────────────────────────────────────────────────────
 const store = new Map();
-for (const p of PASTE_LIST) {
-  store.set(p.name, {
-    status:'checking', httpCode:null, snippet:null, proxyUsed:null,
-    hasCreatedAt:false, firstSeen:new Date(), lastValid:null, errorMsg:null, lastCheck:null
-  });
+
+function initStore() {
+  for (const p of PASTE_LIST) {
+    store.set(p.name, {
+      status: 'checking',
+      httpCode: null,
+      snippet: null,
+      hasCreatedAt: false,
+      firstSeen: new Date(),
+      lastValid: null,
+      lastCheck: null,
+      errorMsg: null
+    });
+  }
 }
+initStore();
 
 function hasCreatedAtKeyword(content) {
-  return content ? content.toUpperCase().includes("CREATED AT") : false;
+  if (!content) return false;
+  return content.toUpperCase().includes("CREATED AT");
 }
 
 function getPreview(content, hasCA) {
-  if (!content) return "(kosong / tidak bisa fetch)";
-  const s = content.length > 180
-    ? content.substring(0, 180).replace(/\n/g, '↵ ') + "…"
+  if (!content) return "(❌ tidak bisa fetch / konten kosong)";
+  const preview = content.length > 200 
+    ? content.substring(0, 200).replace(/\n/g, '↵ ') + "…" 
     : content.replace(/\n/g, '↵ ');
-  return hasCA ? `✅ DITEMUKAN "CREATED AT" — ${s}` : `❌ TIDAK ADA "CREATED AT" — ${s}`;
+  return hasCA ? `✅ DITEMUKAN "CREATED AT" — ${preview}` : `❌ TIDAK ADA "CREATED AT" — ${preview}`;
 }
 
-const PROXY_LABELS = ['allorigins', 'corsproxy.io', 'corsproxy.io#2', 'htmldriven'];
+const PROXY_LABELS = ['allorigins', 'corsproxy.io', 'cors-anywhere', 'thingsproxy', 'codetabs'];
 
-// ─── CHECK ALL ────────────────────────────────────────────────────────────────
+// ─── CHECK ALL PASTES ─────────────────────────────────────────────────────────
 async function checkAllPastes() {
+  // Set semua ke status checking
   for (const p of PASTE_LIST) {
     const old = store.get(p.name);
-    store.set(p.name, { ...old, status:'checking', snippet:null, errorMsg:null, lastCheck:new Date() });
+    store.set(p.name, { ...old, status: 'checking', lastCheck: new Date() });
   }
   render();
 
   const promises = PASTE_LIST.map(async (paste) => {
-    const result   = await fetchRaw(paste.rawUrl);
-    const nowTime  = new Date();
-    const hasCA    = result.ok && result.content ? hasCreatedAtKeyword(result.content) : false;
-    const isValid  = hasCA && result.ok;
-    const oldData  = store.get(paste.name);
+    const result = await fetchRawContent(paste.rawUrl);
+    const nowTime = new Date();
+    const hasCA = result.ok && result.content ? hasCreatedAtKeyword(result.content) : false;
+    const isValid = hasCA && result.ok;
+    const oldData = store.get(paste.name);
     const wasValid = oldData?.status === 'valid';
     const lastValid = isValid ? nowTime : (oldData?.lastValid || null);
 
     store.set(paste.name, {
-      status:       isValid ? 'valid' : 'invalid',
-      httpCode:     result.status || 0,
-      snippet:      result.ok && result.content
-                      ? getPreview(result.content, hasCA)
-                      : `❌ GAGAL: ${result.error || `HTTP ${result.status}`}`,
+      status: isValid ? 'valid' : 'invalid',
+      httpCode: result.status || 0,
+      snippet: result.ok && result.content 
+        ? getPreview(result.content, hasCA)
+        : `❌ GAGAL: ${result.error || 'Tidak bisa mengambil konten'}`,
       hasCreatedAt: hasCA,
-      proxyUsed:    result.proxyUsed ?? null,
-      errorMsg:     !result.ok
-                      ? (result.error || `HTTP ${result.status}`)
-                      : (!hasCA ? "tidak ada 'CREATED AT'" : null),
-      lastValid,
-      firstSeen:    oldData?.firstSeen || nowTime,
-      lastCheck:    nowTime
+      proxyUsed: result.proxyIndex ?? null,
+      errorMsg: !result.ok ? result.error : (!hasCA ? "tidak ada 'CREATED AT'" : null),
+      lastValid: lastValid,
+      firstSeen: oldData?.firstSeen || nowTime,
+      lastCheck: nowTime
     });
 
-    // Kirim webhook saat valid → invalid (satu kali per sesi)
+    // Kirim notifikasi jika berubah dari valid → invalid
     if (wasValid && !isValid && !notifiedInvalid.has(paste.name)) {
       notifiedInvalid.add(paste.name);
-      sendDiscordWebhook(paste, nowTime, result.status || 0);
+      await sendDiscordWebhook(paste, nowTime, result.status || 0);
     }
-    if (isValid) notifiedInvalid.delete(paste.name);
+    
+    if (isValid) {
+      notifiedInvalid.delete(paste.name);
+    }
 
     render();
   });
 
   await Promise.all(promises);
-  document.getElementById('lastCheckTime').textContent = new Date().toLocaleTimeString('id-ID');
+  
+  const lastCheckTime = new Date().toLocaleTimeString('id-ID', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+  });
+  document.getElementById('lastCheckTime').textContent = lastCheckTime;
 }
 
-setInterval(checkAllPastes, AUTO_INTERVAL_MS);
-
-// ─── RENDER ───────────────────────────────────────────────────────────────────
+// ─── RENDER UI ────────────────────────────────────────────────────────────────
 function render() {
   let valid = 0, invalid = 0;
+  
   for (const p of PASTE_LIST) {
     const s = store.get(p.name);
-    if (s?.status === 'valid')   valid++;
+    if (s?.status === 'valid') valid++;
     else if (s?.status === 'invalid') invalid++;
   }
-  document.getElementById('totalCount').textContent   = PASTE_LIST.length;
-  document.getElementById('validCount').textContent   = valid;
+  
+  document.getElementById('totalCount').textContent = PASTE_LIST.length;
+  document.getElementById('validCount').textContent = valid;
   document.getElementById('invalidCount').textContent = invalid;
 
   let html = '';
+  
   for (const paste of PASTE_LIST) {
     const d = store.get(paste.name);
     if (!d) continue;
-    const isValid    = d.status === 'valid';
+    
+    const isValid = d.status === 'valid';
     const isChecking = d.status === 'checking';
-    const cardClass  = isChecking ? 'is-checking' : isValid ? 'is-valid' : 'is-invalid';
-    const pillClass  = isChecking ? 'checking'    : isValid ? 'valid'    : 'invalid';
-    const pillText   = isChecking ? '● checking…' : isValid ? '✓ valid'  : '✗ expired';
+    const cardClass = isChecking ? 'is-checking' : isValid ? 'is-valid' : 'is-invalid';
+    const pillClass = isChecking ? 'checking' : isValid ? 'valid' : 'invalid';
+    const pillText = isChecking ? '● checking…' : isValid ? '✓ valid' : '✗ expired';
 
     let badgeHtml = '';
     if (!isChecking) {
@@ -494,16 +543,17 @@ function render() {
       } else if (d.httpCode === 200 && !d.hasCreatedAt) {
         badgeHtml = `<span class="badge yellow">⚠ 200 OK · no created at</span>`;
       } else if (d.lastValid) {
-        badgeHtml = `<span class="badge red">hilang sejak ${relTime(d.lastValid)}</span>`;
+        const minutesAgo = Math.floor((Date.now() - d.lastValid) / 60000);
+        badgeHtml = `<span class="badge red">hilang sejak ${minutesAgo} menit lalu</span>`;
       } else {
         badgeHtml = `<span class="badge gray">belum pernah valid</span>`;
       }
     }
 
-    const httpLabel  = d.httpCode ? `HTTP ${d.httpCode}` : (isChecking ? '…' : 'ERR');
-    const checkTime  = d.lastCheck ? fmtTime(d.lastCheck) : '--';
-    const proxyLabel = (!isChecking && d.proxyUsed !== null && d.proxyUsed >= 0)
-      ? `<div class="proxy-tag">via ${PROXY_LABELS[d.proxyUsed] || `proxy#${d.proxyUsed}`}</div>`
+    const httpLabel = d.httpCode ? `HTTP ${d.httpCode}` : (isChecking ? '…' : 'ERR');
+    const checkTime = d.lastCheck ? fmtTime(d.lastCheck) : '--';
+    const proxyLabel = (!isChecking && d.proxyUsed !== null && d.proxyUsed >= 0 && d.proxyUsed < PROXY_LABELS.length)
+      ? `<div class="proxy-tag">via ${PROXY_LABELS[d.proxyUsed]}</div>`
       : '';
 
     html += `
@@ -526,56 +576,76 @@ function render() {
       </div>
     </div>`;
   }
+  
   document.getElementById('cardsGrid').innerHTML = html;
 }
 
-// ─── UPTIME ───────────────────────────────────────────────────────────────────
+// ─── UPTIME COUNTER ───────────────────────────────────────────────────────────
 function updateUptime() {
-  const sec = Math.max(0, (Date.now() - START_DATE) / 1000);
-  const d = Math.floor(sec / 86400);
-  const h = Math.floor((sec % 86400) / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = Math.floor(sec % 60);
-  let out = d > 0 ? `${d}d ` : '';
-  out += `${String(h).padStart(2,'0')}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-  document.getElementById('uptimeVal').textContent = out;
+  const elapsedSeconds = Math.max(0, (Date.now() - START_DATE) / 1000);
+  const days = Math.floor(elapsedSeconds / 86400);
+  const hours = Math.floor((elapsedSeconds % 86400) / 3600);
+  const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+  const seconds = Math.floor(elapsedSeconds % 60);
+  
+  let uptimeStr = '';
+  if (days > 0) uptimeStr += `${days}d `;
+  uptimeStr += `${String(hours).padStart(2, '0')}h `;
+  uptimeStr += `${String(minutes).padStart(2, '0')}m `;
+  uptimeStr += `${String(seconds).padStart(2, '0')}s`;
+  
+  document.getElementById('uptimeVal').textContent = uptimeStr;
 }
-setInterval(updateUptime, 1000);
-updateUptime();
 
-// ─── HELPERS ──────────────────────────────────────────────────────────────────
-function fmtTime(d) {
-  return d.toLocaleString('id-ID', {
-    day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false
+// ─── HELPER FUNCTIONS ─────────────────────────────────────────────────────────
+function fmtTime(date) {
+  return date.toLocaleString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
   });
 }
-function relTime(d) {
-  const diff = Math.floor((Date.now() - d) / 1000);
-  if (diff < 60)    return `${diff}d lalu`;
-  if (diff < 3600)  return `${Math.floor(diff/60)}m lalu`;
-  if (diff < 86400) return `${Math.floor(diff/3600)}j ${Math.floor((diff%3600)/60)}m lalu`;
-  return `${Math.floor(diff/86400)}h lalu`;
-}
-function trunc(s, n) {
-  return s && s.length > n ? s.slice(0, n-1) + '…' : (s || '');
-}
-function escH(s) {
-  if (!s) return '';
-  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function trunc(str, length) {
+  if (!str) return '';
+  return str.length > length ? str.substring(0, length - 3) + '…' : str;
 }
 
-// ─── BUTTON ───────────────────────────────────────────────────────────────────
-const btn = document.getElementById('refreshBtn');
-const ico = document.getElementById('refreshIcon');
-btn.addEventListener('click', async () => {
-  btn.disabled = true; ico.classList.add('spin');
+function escH(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// ─── INITIALIZATION ───────────────────────────────────────────────────────────
+const refreshBtn = document.getElementById('refreshBtn');
+const refreshIcon = document.getElementById('refreshIcon');
+
+refreshBtn.addEventListener('click', async () => {
+  refreshBtn.disabled = true;
+  refreshIcon.classList.add('spin');
   await checkAllPastes();
-  ico.classList.remove('spin'); btn.disabled = false;
+  refreshIcon.classList.remove('spin');
+  refreshBtn.disabled = false;
 });
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
+// Auto refresh interval
+setInterval(() => {
+  checkAllPastes();
+}, AUTO_INTERVAL_MS);
+
+// Jalankan pertama kali
 render();
 renderAlertLog();
+updateUptime();
+setInterval(updateUptime, 1000);
 checkAllPastes();
 </script>
 </body>
