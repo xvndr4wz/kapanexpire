@@ -364,10 +364,9 @@ const PASTE_LIST = [
 
 const START_DATE = new Date("2026-06-06T17:30:46+07:00");
 
-// Store: menyimpan lastValid (kapan terakhir kali valid) secara PERSISTEN selama session
+// Store
 let itemsStore = new Map();
 
-// Inisialisasi
 for (let p of PASTE_LIST) {
     itemsStore.set(p.name, {
         status: "checking",
@@ -375,15 +374,15 @@ for (let p of PASTE_LIST) {
         snippet: null,
         hasCreatedAt: false,
         firstSeen: new Date(),
-        lastValid: null,      // 🔥 kunci: terakhir kali konten VALID
+        lastValid: null,
         errorMsg: null,
         lastCheck: null
     });
 }
 
-// ========== FETCH DENGAN MULTI PROXY (coba allorigins dulu, fallback corsproxy) ==========
+// ========== FETCH DENGAN MULTI PROXY (allorigins + fallback) ==========
 async function fetchRawWithProxy(rawUrl) {
-    // Proxy 1: allorigins (lebih jarang 403 untuk paste-bin)
+    // Proxy 1: allorigins (paling stabil)
     const proxy1 = `https://api.allorigins.win/raw?url=${encodeURIComponent(rawUrl)}`;
     try {
         const controller = new AbortController();
@@ -395,7 +394,7 @@ async function fetchRawWithProxy(rawUrl) {
             return { ok: true, status: res.status, content: text, error: null };
         }
     } catch (e) {
-        // fallback ke corsproxy.io
+        // fallback ke corsproxy
     }
     
     // Proxy 2: corsproxy.io
@@ -433,21 +432,18 @@ function getPreview(content, hasCreatedAt) {
     return `❌ TIDAK ADA "CREATED AT" — ${snippet}`;
 }
 
-// PENGECEKAN OTOMATIS (tanpa perlu tekan tombol)
 let isChecking = false;
 
 async function checkAllPastes() {
     if (isChecking) return;
     isChecking = true;
     
-    // Set status checking
     for (let p of PASTE_LIST) {
         const old = itemsStore.get(p.name);
         itemsStore.set(p.name, { ...old, status: "checking", snippet: "⏳ mengambil konten...", lastCheck: new Date() });
     }
     renderDashboard();
     
-    // Parallel semua request
     const promises = PASTE_LIST.map(async (paste) => {
         const result = await fetchRawWithProxy(paste.rawUrl);
         const nowTime = new Date();
@@ -457,11 +453,9 @@ async function checkAllPastes() {
         const oldData = itemsStore.get(paste.name);
         let lastValid = oldData?.lastValid || null;
         
-        // 🔥 KUNCI: Jika sekarang VALID, update lastValid ke sekarang
         if (isValid) {
             lastValid = nowTime;
         }
-        // Jika sekarang TIDAK VALID, lastValid tetap menyimpan kapan terakhir kali dia VALID (tidak direset)
         
         const snippetText = result.ok && result.content 
             ? getPreview(result.content, hasCreated)
@@ -474,7 +468,7 @@ async function checkAllPastes() {
             snippet: snippetText,
             hasCreatedAt: hasCreated,
             errorMsg: !result.ok ? (result.error || `HTTP ${result.status}`) : (isValid ? null : "Konten tidak mengandung 'CREATED AT'"),
-            lastValid: lastValid,      // mempertahankan lastValid dari masa lalu
+            lastValid: lastValid,
             firstSeen: oldData?.firstSeen || nowTime,
             lastCheck: nowTime
         };
@@ -483,23 +477,12 @@ async function checkAllPastes() {
     const results = await Promise.all(promises);
     for (let res of results) {
         const existing = itemsStore.get(res.name);
-        itemsStore.set(res.name, {
-            ...existing,
-            status: res.status,
-            httpCode: res.httpCode,
-            snippet: res.snippet,
-            hasCreatedAt: res.hasCreatedAt,
-            errorMsg: res.errorMsg,
-            lastValid: res.lastValid,    // lastValid tetap tersimpan otomatis
-            firstSeen: existing?.firstSeen || res.firstSeen,
-            lastCheck: res.lastCheck
-        });
+        itemsStore.set(res.name, { ...existing, ...res });
     }
     renderDashboard();
     isChecking = false;
 }
 
-// Format uptime lengkap
 function formatUptimeDetailed(seconds) {
     if (seconds < 0) seconds = 0;
     const years = Math.floor(seconds / 31536000);
@@ -534,7 +517,6 @@ function getLostSinceText(lastValidDate) {
 }
 
 function renderDashboard() {
-    // Update stat
     let validTotal = 0, invalidTotal = 0;
     for (let p of PASTE_LIST) {
         const state = itemsStore.get(p.name);
@@ -545,12 +527,10 @@ function renderDashboard() {
     document.getElementById("validCount").innerText = validTotal;
     document.getElementById("invalidCount").innerText = invalidTotal;
     
-    // Update uptime
     const now = new Date();
     const elapsedSec = (now - START_DATE) / 1000;
     document.getElementById("uptimeDetail").innerHTML = formatUptimeDetailed(elapsedSec);
     
-    // Render cards
     let html = '';
     for (let paste of PASTE_LIST) {
         const data = itemsStore.get(paste.name);
@@ -579,13 +559,10 @@ function renderDashboard() {
             }
         }
         
-        // 🔥 Menampilkan kapan terakhir valid (hilang dari kapan)
         let lostInfoHtml = '';
         if (!isValid && !isCheckingNow && data.lastValid) {
             const lostText = getLostSinceText(data.lastValid);
-            if (lostText) {
-                lostInfoHtml = `<div class="lost-since">⏳ konten hilang sejak ${lostText}</div>`;
-            }
+            if (lostText) lostInfoHtml = `<div class="lost-since">⏳ konten hilang sejak ${lostText}</div>`;
         } else if (!isValid && !isCheckingNow && !data.lastValid) {
             lostInfoHtml = `<div class="warning-badge" style="background:#f1f5f9; color:#4a627a;">ℹ️ tidak pernah terdeteksi valid</div>`;
         } else if (isValid && data.lastValid) {
@@ -632,7 +609,6 @@ function escapeHtml(str) {
     return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
 }
 
-// Update uptime tiap detik
 setInterval(() => {
     const now = new Date();
     const elapsed = (now - START_DATE) / 1000;
@@ -640,15 +616,10 @@ setInterval(() => {
     if (uptimeElem) uptimeElem.innerHTML = formatUptimeDetailed(elapsed);
 }, 1000);
 
-// Auto refresh setiap 30 DETIK (tanpa perlu tekan tombol)
-setInterval(() => {
-    checkAllPastes();
-}, 1000);
+setInterval(() => { checkAllPastes(); }, 1000);
 
-// Manual refresh button
 document.getElementById("manualRefreshBtn").addEventListener("click", () => checkAllPastes());
 
-// Start
 checkAllPastes();
 </script>
 </body>
