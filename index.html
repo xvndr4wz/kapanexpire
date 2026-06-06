@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🔥 PASTE MONITOR · VALIDATOR ASLI (CREATED AT)</title>
+<title>Pulse Monitor · Paste Validator</title>
 <style>
 * {
     margin: 0;
@@ -12,498 +12,629 @@
 }
 
 body {
-    background: linear-gradient(135deg, #0a0c12 0%, #03050b 100%);
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    padding: 20px;
-    min-height: 100vh;
+    background: #f5f7fb;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    padding: 32px 24px;
+    color: #1e293b;
 }
 
 .container {
-    max-width: 1500px;
+    max-width: 1400px;
     margin: 0 auto;
 }
 
-/* header */
+/* header minimal */
 .header {
-    text-align: center;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
 }
 
 h1 {
-    font-size: 2.2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #60a5fa, #a78bfa, #34d399);
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    background: linear-gradient(135deg, #0f172a, #334155);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    margin-bottom: 12px;
-}
-
-.sub {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+    display: inline-block;
 }
 
 .badge-sub {
-    background: #1e293b;
-    padding: 4px 14px;
-    border-radius: 40px;
-    font-size: 0.7rem;
-    color: #94a3b8;
+    font-size: 0.75rem;
+    color: #5b6e8c;
+    background: #eef2ff;
+    padding: 4px 12px;
+    border-radius: 30px;
+    margin-left: 12px;
 }
 
-/* stats row */
-.stats-row {
+/* stat cards */
+.stats-grid {
     display: flex;
-    justify-content: center;
-    gap: 20px;
+    gap: 16px;
     flex-wrap: wrap;
-    margin: 20px 0;
+    margin: 24px 0 28px;
 }
 
-.stat-card {
-    background: #0f172a;
-    border-radius: 28px;
-    padding: 10px 24px;
-    border: 1px solid #334155;
-    backdrop-filter: blur(8px);
+.stat {
+    background: white;
+    border-radius: 24px;
+    padding: 14px 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 1px 6px rgba(0,0,0,0.05);
+    border: 1px solid #e9edf2;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
 }
 
-.stat-card .label {
-    font-size: 0.7rem;
-    color: #94a3b8;
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #5b6e8c;
+    text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
-.stat-card .value {
-    font-size: 1.6rem;
+.stat-value {
+    font-size: 1.7rem;
     font-weight: 700;
-    margin-left: 8px;
+    color: #0f172a;
+    line-height: 1;
 }
 
-.stat-card.valid .value { color: #4ade80; }
-.stat-card.invalid .value { color: #f87171; }
-.stat-card.total .value { color: #60a5fa; }
+.stat.valid .stat-value { color: #10b981; }
+.stat.invalid .stat-value { color: #ef4444; }
+
+/* uptime panel khusus */
+.uptime-panel {
+    background: white;
+    border-radius: 20px;
+    padding: 12px 20px;
+    margin-bottom: 28px;
+    border: 1px solid #eef2f6;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.uptime-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #5b6e8c;
+    letter-spacing: 0.5px;
+}
+
+.uptime-value {
+    font-family: 'SF Mono', 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    background: #f8fafc;
+    padding: 6px 14px;
+    border-radius: 40px;
+    color: #1e293b;
+}
 
 .refresh-btn {
-    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    background: #0f172a;
     border: none;
     color: white;
-    padding: 10px 28px;
+    padding: 8px 24px;
     border-radius: 40px;
-    font-weight: 600;
+    font-size: 0.8rem;
+    font-weight: 500;
     cursor: pointer;
-    font-size: 0.85rem;
-    transition: transform 0.1s;
-    margin-left: 15px;
+    transition: 0.2s;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
 .refresh-btn:hover {
-    transform: scale(1.02);
-    opacity: 0.95;
+    background: #1e293b;
+    transform: scale(0.98);
 }
 
-.auto-status {
-    font-size: 0.7rem;
-    color: #22c55e;
-    background: #0f172a;
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    margin-left: 10px;
-}
-
-/* grid */
+/* grid modern */
 .grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-    gap: 18px;
-    margin-top: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 20px;
 }
 
 .card {
-    background: #0f172ae6;
-    backdrop-filter: blur(4px);
-    border-radius: 20px;
-    border: 1px solid #253045;
-    transition: all 0.2s;
+    background: white;
+    border-radius: 24px;
+    border: 1px solid #edf2f7;
     overflow: hidden;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.02);
 }
 
 .card:hover {
-    border-color: #3b82f6;
-    transform: translateY(-3px);
-    box-shadow: 0 12px 28px -8px black;
+    box-shadow: 0 12px 24px -12px rgba(0,0,0,0.12);
+    border-color: #cbd5e1;
 }
 
 .card-header {
+    padding: 16px 18px 8px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 14px 18px 10px;
-    background: rgba(0,0,0,0.2);
-    border-bottom: 1px solid #1e2a3a;
+    border-bottom: 1px solid #f0f2f5;
 }
 
-.name {
-    font-weight: 800;
-    font-size: 1.1rem;
-    background: linear-gradient(135deg, #e2e8f0, #b9d0f0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}
-
-.status-badge {
-    font-size: 0.7rem;
+.card-name {
     font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 30px;
+    font-size: 1rem;
+    color: #0f172a;
+    letter-spacing: -0.2px;
 }
 
-.status-badge.valid {
-    background: #065f46;
-    color: #a7f3d0;
-    box-shadow: 0 0 6px #10b98150;
-}
-
-.status-badge.invalid {
-    background: #7f1a1a;
-    color: #fecaca;
-}
-
-.status-badge.checking {
-    background: #334155;
-    color: #cbd5e1;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.6; }
-    100% { opacity: 1; }
-}
-
-.url-box {
-    padding: 12px 18px;
-    background: #060b14;
-    margin: 10px 14px;
-    border-radius: 14px;
+.status {
     font-size: 0.7rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 40px;
+}
+
+.status.valid {
+    background: #e9f9ef;
+    color: #0a6b3f;
+}
+
+.status.invalid {
+    background: #fee9e6;
+    color: #c2410c;
+}
+
+.status.checking {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.url-block {
+    padding: 12px 18px;
+    background: #fafcff;
+    border-bottom: 1px solid #f0f4f9;
+    font-size: 0.7rem;
+}
+
+.url-block a {
+    color: #3b82f6;
+    text-decoration: none;
     word-break: break-all;
 }
 
-.url-box a {
-    color: #7aa2f7;
-    text-decoration: none;
-}
-
-.url-box a:hover {
+.url-block a:hover {
     text-decoration: underline;
 }
 
-/* konten asli preview */
-.raw-preview {
-    background: #020617;
-    margin: 10px 14px;
-    border-radius: 16px;
-    padding: 12px;
-    border-left: 3px solid;
-    border-left-color: #3b82f6;
-    font-family: 'SF Mono', 'Fira Code', monospace;
+/* konten preview */
+.content-preview {
+    padding: 14px 18px;
+    background: #fefefe;
+    border-bottom: 1px solid #f0f4f9;
     font-size: 0.7rem;
-    max-height: 150px;
+    font-family: 'SF Mono', monospace;
+    max-height: 130px;
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-word;
-    color: #cbd5e6;
+    color: #334155;
+    line-height: 1.45;
 }
 
-.raw-preview.valid-border {
-    border-left-color: #22c55e;
+.preview-label {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c86a3;
+    margin-bottom: 8px;
 }
 
-.raw-preview.invalid-border {
-    border-left-color: #ef4444;
-}
-
-.created-at-highlight {
-    background: #065f46;
-    color: #d1fae5;
+.highlight-created {
+    background: #e6f7ec;
+    color: #0b5e3a;
     padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 0.65rem;
+    border-radius: 16px;
+    font-size: 0.6rem;
+    font-weight: 600;
     display: inline-block;
-    margin-top: 6px;
+    margin-top: 8px;
+}
+
+.warning-badge {
+    background: #fff3e3;
+    color: #b45b0a;
+    padding: 2px 8px;
+    border-radius: 16px;
+    font-size: 0.6rem;
+    font-weight: 500;
+    display: inline-block;
 }
 
 .card-footer {
-    padding: 10px 16px 14px;
+    padding: 12px 18px;
+    background: #fbfdff;
     display: flex;
     justify-content: space-between;
-    font-size: 0.6rem;
-    color: #5b6e8c;
-    border-top: 1px solid #1e2a3a;
-    margin-top: 6px;
+    font-size: 0.65rem;
+    color: #6c86a3;
+    border-top: 1px solid #eff3f8;
 }
 
-.http-code {
-    font-family: monospace;
-    background: #1e293b;
+.timestamp-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.lost-since {
+    font-size: 0.6rem;
+    color: #dc2626;
+    background: #fef2f2;
     padding: 2px 8px;
     border-radius: 20px;
+    display: inline-block;
+}
+
+.loading-skeleton {
+    background: linear-gradient(90deg, #f0f3f8 25%, #e9edf2 50%, #f0f3f8 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.empty-content {
+    color: #94a3b8;
+    font-style: italic;
+}
+
+footer {
+    text-align: center;
+    margin-top: 48px;
+    font-size: 0.7rem;
+    color: #94a3b8;
 }
 </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1>📡 UPLOAD MONITOR · VERIFIKASI KONTEN ASLI</h1>
-        <div class="sub">
-            <span class="badge-sub">🔍 Fetch RAW langsung (via CORS proxy)</span>
-            <span class="badge-sub">✅ Valid jika mengandung teks <strong style="color:#4ade80">"CREATED AT"</strong></span>
-            <span class="badge-sub">🔄 Auto update setiap 20 detik</span>
-        </div>
-        <div class="stats-row">
-            <div class="stat-card total">
-                <span class="label">📦 TOTAL LINK</span>
-                <span class="value" id="totalCount">0</span>
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+            <div>
+                <h1>pulse monitor</h1>
+                <span class="badge-sub">cek konten asli · created at</span>
             </div>
-            <div class="stat-card valid">
-                <span class="label">✅ VALID (CREATED AT)</span>
-                <span class="value" id="validCount">0</span>
-            </div>
-            <div class="stat-card invalid">
-                <span class="label">❌ INVALID / DEAD</span>
-                <span class="value" id="invalidCount">0</span>
-            </div>
-            <div style="display: flex; align-items: center;">
-                <div style="background:#0f172a; border-radius: 40px; padding: 6px 20px;">
-                    <span style="font-size:0.75rem;">🕒 <span id="liveClock">--:--:--</span></span>
-                    <span style="margin-left: 12px;">⏱️ <span id="uptimeText">0d 0h 0m</span></span>
-                </div>
-                <button class="refresh-btn" id="forceRefreshBtn">⟳ FORCE UPDATE</button>
-                <span class="auto-status" id="autoStatusText">● auto-refresh aktif</span>
-            </div>
+            <button class="refresh-btn" id="manualRefreshBtn">⟳ cek sekarang</button>
         </div>
     </div>
+
+    <!-- stats ringkas -->
+    <div class="stats-grid">
+        <div class="stat total">
+            <span class="stat-label">total link</span>
+            <span class="stat-value" id="totalCount">0</span>
+        </div>
+        <div class="stat valid">
+            <span class="stat-label">valid (created at)</span>
+            <span class="stat-value" id="validCount">0</span>
+        </div>
+        <div class="stat invalid">
+            <span class="stat-label">expired / hilang</span>
+            <span class="stat-value" id="invalidCount">0</span>
+        </div>
+    </div>
+
+    <!-- uptime lengkap sesuai permintaan -->
+    <div class="uptime-panel">
+        <span class="uptime-title">⏱️ seit 6 juni 2026 · 17:30:46</span>
+        <div class="uptime-value" id="uptimeDetail">--</div>
+    </div>
+
     <div id="cardsGrid" class="grid"></div>
-    <div style="text-align: center; margin-top: 32px; font-size: 0.65rem; color: #475569;">
-        ⚡ Setiap paste di-fetch isi RAW asli → deteksi substring "CREATED AT" → status VALID jika ditemukan + HTTP 200
-    </div>
+    <footer>✓ cek parallel langsung semua · tanpa auto refresh · menampilkan konten asli & status "CREATED AT"</footer>
 </div>
 
 <script>
-// ============ DAFTAR PASTE YANG DIMONITOR ============
-const PASTE_LIST = [
-    { name: "NEKOID.CC", url: "https://pb.nekoid.cc/uCbr", rawUrl: "https://pb.nekoid.cc/uCbr" },
-    { name: "PASTE.EE VIEW", url: "https://paste.ee/p/jDq3THqM", rawUrl: "https://paste.ee/r/jDq3THqM" },
-    { name: "PASTE.EE RAW", url: "https://paste.ee/r/jDq3THqM", rawUrl: "https://paste.ee/r/jDq3THqM" },
-    { name: "RUBIS VIEW", url: "https://rubis.app/view/?scrap=TdrQo24Kat2JpHz2", rawUrl: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
-    { name: "RUBIS RAW API", url: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw", rawUrl: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
-    { name: "PASTEFY", url: "https://pastefy.app/8uNFL4QZ/raw", rawUrl: "https://pastefy.app/8uNFL4QZ/raw" },
-    { name: "PASTE.RS", url: "https://paste.rs/gInQ0", rawUrl: "https://paste.rs/gInQ0" },
-    { name: "PASTEBIN", url: "https://pastebin.com/raw/inZGNrT4", rawUrl: "https://pastebin.com/raw/inZGNrT4" },
-    { name: "MYST PASTE", url: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4", rawUrl: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4" },
-    { name: "BASEDBIN", url: "https://basedbin.fly.dev/sTIYAV", rawUrl: "https://basedbin.fly.dev/sTIYAV" },
-    { name: "DPASTE", url: "https://dpaste.com/CYSYJERKM.txt", rawUrl: "https://dpaste.com/CYSYJERKM.txt" },
-    { name: "PASTE-BIN.XYZ", url: "https://paste-bin.xyz/raw/NRE5c667", rawUrl: "https://paste-bin.xyz/raw/NRE5c667" },
-    { name: "HST.SH", url: "https://hst.sh/raw/iqahiluzev", rawUrl: "https://hst.sh/raw/iqahiluzev" },
-    { name: "HASTE.ZNEIX", url: "https://haste.zneix.eu/raw/opytesucux", rawUrl: "https://haste.zneix.eu/raw/opytesucux" },
-    { name: "SOURCEB.IN", url: "https://cdn.sourceb.in/bins/hw37mRWTu1/0", rawUrl: "https://cdn.sourceb.in/bins/hw37mRWTu1/0" },
-    { name: "P.IP.FI", url: "https://p.ip.fi/2JWL.txt", rawUrl: "https://p.ip.fi/2JWL.txt" }
+// ======================== DATA SOURCES ========================
+const PASTES = [
+    { name: "NEKOID.CC", url: "https://pb.nekoid.cc/uCbr", raw: "https://pb.nekoid.cc/uCbr" },
+    { name: "PASTE.EE VIEW", url: "https://paste.ee/p/jDq3THqM", raw: "https://paste.ee/r/jDq3THqM" },
+    { name: "PASTE.EE RAW", url: "https://paste.ee/r/jDq3THqM", raw: "https://paste.ee/r/jDq3THqM" },
+    { name: "RUBIS VIEW", url: "https://rubis.app/view/?scrap=TdrQo24Kat2JpHz2", raw: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
+    { name: "RUBIS RAW", url: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw", raw: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
+    { name: "PASTEFY", url: "https://pastefy.app/8uNFL4QZ/raw", raw: "https://pastefy.app/8uNFL4QZ/raw" },
+    { name: "PASTE.RS", url: "https://paste.rs/gInQ0", raw: "https://paste.rs/gInQ0" },
+    { name: "PASTEBIN", url: "https://pastebin.com/raw/inZGNrT4", raw: "https://pastebin.com/raw/inZGNrT4" },
+    { name: "MYST", url: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4", raw: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4" },
+    { name: "BASEDBIN", url: "https://basedbin.fly.dev/sTIYAV", raw: "https://basedbin.fly.dev/sTIYAV" },
+    { name: "DPASTE", url: "https://dpaste.com/CYSYJERKM.txt", raw: "https://dpaste.com/CYSYJERKM.txt" },
+    { name: "PASTE-BIN.XYZ", url: "https://paste-bin.xyz/raw/NRE5c667", raw: "https://paste-bin.xyz/raw/NRE5c667" },
+    { name: "HST.SH", url: "https://hst.sh/raw/iqahiluzev", raw: "https://hst.sh/raw/iqahiluzev" },
+    { name: "HASTE.ZNEIX", url: "https://haste.zneix.eu/raw/opytesucux", raw: "https://haste.zneix.eu/raw/opytesucux" },
+    { name: "SOURCEB.IN", url: "https://cdn.sourceb.in/bins/hw37mRWTu1/0", raw: "https://cdn.sourceb.in/bins/hw37mRWTu1/0" },
+    { name: "P.IP.FI", url: "https://p.ip.fi/2JWL.txt", raw: "https://p.ip.fi/2JWL.txt" }
 ];
 
-// STORE status setiap paste
-let store = new Map(); // key = name, value = { status, httpCode, contentSnippet, fullContent, hasCreatedAt, error, timestamp }
+const START_DATE = new Date("2026-06-06T17:30:46+07:00");
 
-const START_TIME = new Date("2026-06-06T17:30:46+07:00");
+// Store setiap item: { status, httpCode, snippet, hasCreatedAt, firstSeen, lastValid, contentSample, errorMsg, lastCheck }
+// Untuk "hilang dari kapan" kita track lastValid (terakhir kali valid ditemukan)
+let itemsStore = new Map();
 
-// === FETCH DENGAN CORS PROXY YANG HANDAL (corsproxy.io) ===
-async function fetchRawWithProxy(rawUrl) {
-    // menggunakan corsproxy.io - gratis dan stabil
-    const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
+// Inisialisasi firstSeen & lastValid (default: pertama kali dianggap belum pernah valid)
+for (let p of PASTES) {
+    itemsStore.set(p.name, {
+        status: "checking",
+        httpCode: null,
+        snippet: null,
+        hasCreatedAt: false,
+        firstSeen: new Date(),
+        lastValid: null,      // kapan terakhir kali ditemukan CREATED AT
+        contentSample: null,
+        errorMsg: null,
+        lastCheck: null
+    });
+}
+
+// ========== FUNGSI FETCH PARALLEL (CORS PROXY) ==========
+async function fetchRawViaProxy(rawUrl) {
+    const proxy = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 14000);
-        const response = await fetch(proxyUrl, {
-            method: "GET",
-            signal: controller.signal,
-            headers: {
-                "Cache-Control": "no-cache, no-store"
-            }
-        });
-        clearTimeout(timeoutId);
-        
-        let httpStatus = response.status;
-        if (!response.ok) {
-            return { ok: false, status: httpStatus, content: null, error: `HTTP ${httpStatus}` };
-        }
-        
-        const text = await response.text();
-        return { ok: true, status: httpStatus, content: text, error: null };
+        const timeout = setTimeout(() => controller.abort(), 12000);
+        const res = await fetch(proxy, { signal: controller, cache: "no-store" });
+        clearTimeout(timeout);
+        if (!res.ok) return { ok: false, status: res.status, content: null };
+        const text = await res.text();
+        return { ok: true, status: res.status, content: text };
     } catch (err) {
-        let msg = err.name === 'AbortError' ? "Timeout (14s)" : err.message;
-        return { ok: false, status: 0, content: null, error: msg };
+        return { ok: false, status: 0, content: null, error: err.message };
     }
 }
 
-// cek apakah ada "CREATED AT" di konten
-function hasCreatedAtKeyword(content) {
+// Cek apakah mengandung "CREATED AT"
+function containsCreatedAt(content) {
     if (!content) return false;
     return content.toUpperCase().includes("CREATED AT");
 }
 
-// ambil snippet untuk preview (maks 200 karakter)
-function getPreview(content, hasCreatedAt) {
-    if (!content) return "(empty response)";
-    let snippet = content.length > 200 ? content.substring(0, 200) + "…" : content;
-    snippet = snippet.replace(/\n/g, '↵ ').replace(/\r/g, '');
+// Generate preview snippet (maks 180 karakter)
+function makePreview(content, hasCreatedAt) {
+    if (!content) return "(kosong / tidak bisa fetch)";
+    let truncated = content.length > 180 ? content.substring(0, 180).replace(/\n/g, '↵ ') + "…" : content.replace(/\n/g, '↵ ');
     if (hasCreatedAt) {
-        // highlight kalau ada CREATED AT
-        return `✅ [FOUND 'CREATED AT'] → ${snippet}`;
+        return `✓ Ditemukan "CREATED AT" — ${truncated}`;
     }
-    return `❌ [TIDAK ADA 'CREATED AT'] → ${snippet}`;
+    return `✗ Tidak ada "CREATED AT" — ${truncated}`;
 }
 
-// update semua paste (async batch)
-async function refreshAllPastes() {
-    // set semua status ke checking
-    for (let p of PASTE_LIST) {
-        store.set(p.name, {
+// update semua paste secara parallel (Promise.all)
+async function checkAllPastes() {
+    // Set status checking
+    for (let p of PASTES) {
+        const old = itemsStore.get(p.name);
+        itemsStore.set(p.name, {
+            ...old,
             status: "checking",
-            httpCode: null,
-            contentSnippet: "⏳ mengambil konten asli...",
-            hasCreatedAt: false,
-            error: null,
-            timestamp: new Date()
+            snippet: "memeriksa konten...",
+            errorMsg: null,
+            lastCheck: new Date()
         });
     }
-    renderCards(); // render loading
-    
-    // proses satu per satu agar akurat dan tidak kelebihan request (delay kecil)
-    for (let i = 0; i < PASTE_LIST.length; i++) {
-        const paste = PASTE_LIST[i];
-        const result = await fetchRawWithProxy(paste.rawUrl);
+    renderDashboard();
+
+    // Buat semua request parallel
+    const promises = PASTES.map(async (paste) => {
+        const result = await fetchRawViaProxy(paste.raw);
+        const nowTime = new Date();
+        const hasCreated = result.ok && result.content ? containsCreatedAt(result.content) : false;
+        const isValid = hasCreated && result.ok;
         
-        let isValid = false;
-        let hasCreated = false;
-        let snippet = "";
-        let fullContentPreview = "";
+        const oldData = itemsStore.get(paste.name);
+        let lastValid = oldData?.lastValid || null;
         
-        if (result.ok && result.content) {
-            hasCreated = hasCreatedAtKeyword(result.content);
-            isValid = hasCreated; // valid hanya jika mengandung "CREATED AT"
-            fullContentPreview = result.content;
-            snippet = getPreview(result.content, hasCreated);
-        } else {
-            snippet = `❌ GAGAL FETCH: ${result.error || "tidak tersambung"}`;
-            fullContentPreview = "";
+        // Jika sekarang valid dan sebelumnya lastValid null atau berubah, update lastValid
+        if (isValid) {
+            lastValid = nowTime;
         }
         
-        store.set(paste.name, {
+        // Jika sekarang tidak valid, lastValid tetap seperti sebelumnya (terakhir kali valid)
+        // Untuk menampilkan "hilang dari kapan" -> jika lastValid ada dan status sekarang invalid, kita bisa hitung durasi sejak lastValid
+        
+        const snippetText = result.ok ? makePreview(result.content, hasCreated) : `Gagal fetch: ${result.error || `HTTP ${result.status}`}`;
+        
+        return {
+            name: paste.name,
             status: isValid ? "valid" : "invalid",
             httpCode: result.ok ? result.status : (result.status || 0),
-            contentSnippet: snippet,
-            fullContentPreview: fullContentPreview.substring(0, 300),
+            snippet: snippetText,
             hasCreatedAt: hasCreated,
-            error: result.error,
-            timestamp: new Date()
-        });
-        
-        renderCards(); // update progress setiap selesai 1
-        await new Promise(r => setTimeout(r, 100)); // sedikit jeda biar smooth
-    }
+            contentSample: result.content ? result.content.substring(0, 300) : null,
+            errorMsg: !result.ok ? (result.error || `HTTP ${result.status}`) : (isValid ? null : "Konten tidak mengandung 'CREATED AT'"),
+            lastValid: lastValid,
+            firstSeen: oldData?.firstSeen || nowTime,
+            lastCheck: nowTime
+        };
+    });
     
-    // setelah semua selesai, update stat terakhir
-    renderCards();
-    updateStatsUI();
+    const results = await Promise.all(promises);
+    for (let res of results) {
+        const existing = itemsStore.get(res.name);
+        itemsStore.set(res.name, {
+            ...existing,
+            status: res.status,
+            httpCode: res.httpCode,
+            snippet: res.snippet,
+            hasCreatedAt: res.hasCreatedAt,
+            contentSample: res.contentSample,
+            errorMsg: res.errorMsg,
+            lastValid: res.lastValid,
+            firstSeen: existing?.firstSeen || res.firstSeen,
+            lastCheck: res.lastCheck
+        });
+    }
+    renderDashboard();
 }
 
-// render kartu dengan bukti konten asli
-function renderCards() {
-    let gridHtml = "";
+// ========== FORMAT UPTIME LENGKAP (detik/menit/jam/hari/bulan/tahun) ==========
+function formatUptimeDetailed(seconds) {
+    if (seconds < 0) seconds = 0;
     
-    for (let paste of PASTE_LIST) {
-        const data = store.get(paste.name) || { status: "checking", httpCode: null, contentSnippet: "menunggu...", hasCreatedAt: false, timestamp: new Date() };
+    const years = Math.floor(seconds / 31536000);
+    const months = Math.floor((seconds % 31536000) / 2592000);
+    const days = Math.floor((seconds % 2592000) / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    // format sesuai permintaan: menit detik | jam + menit | hari + jam | bulan + hari | tahun + bulan + hari
+    let parts = [];
+    parts.push(`${minutes} menit ${secs} detik`);
+    parts.push(`${hours} jam ${minutes} menit`);
+    parts.push(`${days} hari ${hours} jam`);
+    if (months > 0) parts.push(`${months} bulan ${days} hari`);
+    if (years > 0) parts.push(`${years} tahun ${months} bulan ${days} hari`);
+    
+    return parts.join(' | ');
+}
+
+// hitung durasi hilang (sejak lastValid sampai sekarang)
+function getLostSinceText(lastValidDate) {
+    if (!lastValidDate) return null;
+    const now = new Date();
+    const diffMs = now - lastValidDate;
+    if (diffMs < 0) return null;
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return `${diffSec} detik lalu`;
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} menit lalu`;
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour} jam ${diffMin % 60} menit lalu`;
+    const diffDay = Math.floor(diffHour / 24);
+    if (diffDay < 30) return `${diffDay} hari ${diffHour % 24} jam lalu`;
+    const diffMonth = Math.floor(diffDay / 30);
+    if (diffMonth < 12) return `${diffMonth} bulan ${diffDay % 30} hari lalu`;
+    const diffYear = Math.floor(diffMonth / 12);
+    return `${diffYear} tahun ${diffMonth % 12} bulan ${diffDay % 30} hari lalu`;
+}
+
+// render UI dengan informasi "hilang dari kapan"
+function renderDashboard() {
+    // update stat angka
+    let validTotal = 0, invalidTotal = 0;
+    for (let p of PASTES) {
+        const state = itemsStore.get(p.name);
+        if (state?.status === "valid") validTotal++;
+        else if (state?.status === "invalid") invalidTotal++;
+    }
+    document.getElementById("totalCount").innerText = PASTES.length;
+    document.getElementById("validCount").innerText = validTotal;
+    document.getElementById("invalidCount").innerText = invalidTotal;
+    
+    // update uptime panjang dari START_DATE (6 juni 2026 17:30:46)
+    const now = new Date();
+    const elapsedSec = (now - START_DATE) / 1000;
+    const uptimeStr = formatUptimeDetailed(elapsedSec);
+    document.getElementById("uptimeDetail").innerHTML = uptimeStr;
+    
+    // render cards
+    let html = '';
+    for (let paste of PASTES) {
+        const data = itemsStore.get(paste.name);
+        if (!data) continue;
+        
         const isValid = data.status === "valid";
         const isChecking = data.status === "checking";
+        const hasCreated = data.hasCreatedAt;
         
-        let statusClass = isChecking ? "checking" : (isValid ? "valid" : "invalid");
-        let statusText = isChecking ? "🔄 FETCHING..." : (isValid ? "✅ VALID (CREATED AT ✔️)" : "❌ INVALID / EXPIRED");
-        
-        let httpDisplay = data.httpCode ? `HTTP ${data.httpCode}` : (data.error ? "ERROR" : "--");
-        let borderClass = isValid ? "valid-border" : (isChecking ? "" : "invalid-border");
-        
-        // buktikan konten asli yang di-fetch
-        let rawPreviewHtml = "";
-        if (isChecking) {
-            rawPreviewHtml = `<div style="color:#7e8a98;">⏳ Sedang mengambil konten asli dari server...</div>`;
-        } else {
-            let previewText = data.contentSnippet || "(tidak ada konten)";
-            let highlightHtml = "";
-            if (isValid && data.hasCreatedAt) {
-                highlightHtml = `<div class="created-at-highlight">🔖 DITEMUKAN: "CREATED AT" di dalam konten asli ✅</div>`;
-            } else if (!isValid && data.httpCode === 200 && !data.hasCreatedAt) {
-                highlightHtml = `<div style="background:#7f1a1a; padding:3px 10px; border-radius:12px; font-size:0.65rem; display:inline-block; margin-top:6px;">⚠️ HTTP 200 tapi tidak mengandung 'CREATED AT'</div>`;
-            } else if (!isValid && data.httpCode && data.httpCode !== 200) {
-                highlightHtml = `<div style="background:#450a0a; padding:3px 10px; border-radius:12px; font-size:0.65rem;">⚠️ Gagal fetch: ${data.error || `HTTP ${data.httpCode}`}</div>`;
+        let statusClass = "checking";
+        let statusText = "memeriksa...";
+        if (!isChecking) {
+            if (isValid) {
+                statusClass = "valid";
+                statusText = "✓ valid (created at)";
+            } else {
+                statusClass = "invalid";
+                statusText = "✗ expired / hilang";
             }
-            
-            rawPreviewHtml = `
-                <div style="margin-bottom: 6px; font-size:0.65rem; color:#8ca3c0;">📄 KONTEN ASLI (RAW) :</div>
-                <div style="white-space: pre-wrap; word-break: break-word;">${escapeHtml(previewText)}</div>
-                ${highlightHtml}
-            `;
         }
         
-        gridHtml += `
+        const httpDisplay = data.httpCode ? `HTTP ${data.httpCode}` : (data.errorMsg ? "fetch error" : "--");
+        
+        // Preview konten asli
+        let previewHtml = `<div class="preview-label">📄 konten asli (raw)</div>`;
+        if (isChecking) {
+            previewHtml += `<div class="loading-skeleton" style="height: 60px; border-radius: 12px;"></div>`;
+        } else {
+            let snippetContent = data.snippet || "(tidak ada konten)";
+            previewHtml += `<div style="white-space: pre-wrap; font-size:0.7rem;">${escapeHtml(snippetContent)}</div>`;
+            if (isValid && hasCreated) {
+                previewHtml += `<div class="highlight-created">✓ mengandung 'CREATED AT'</div>`;
+            } else if (!isValid && data.httpCode === 200 && !hasCreated) {
+                previewHtml += `<div class="warning-badge">⚠️ HTTP 200 tapi tidak ada 'CREATED AT'</div>`;
+            } else if (!isValid && data.errorMsg) {
+                previewHtml += `<div class="warning-badge">⚠️ ${escapeHtml(data.errorMsg)}</div>`;
+            }
+        }
+        
+        // Informasi "hilang dari kapan" (jika status invalid dan pernah valid sebelumnya)
+        let lostInfoHtml = '';
+        if (!isValid && !isChecking && data.lastValid) {
+            const lostText = getLostSinceText(data.lastValid);
+            if (lostText) {
+                lostInfoHtml = `<div class="lost-since">⏳ konten hilang sejak ${lostText}</div>`;
+            }
+        } else if (!isValid && !isChecking && !data.lastValid && data.firstSeen) {
+            // tidak pernah valid sama sekali
+            lostInfoHtml = `<div class="lost-since" style="background:#f1f5f9; color:#475569;">ℹ️ tidak pernah terdeteksi valid</div>`;
+        } else if (isValid && data.lastValid) {
+            lostInfoHtml = `<div style="font-size:0.6rem; color:#10b981;">✓ terakhir valid: ${formatTime(data.lastValid)}</div>`;
+        }
+        
+        // first seen
+        const firstSeenStr = data.firstSeen ? formatTime(data.firstSeen) : "--";
+        
+        html += `
         <div class="card">
             <div class="card-header">
-                <span class="name">📌 ${escapeHtml(paste.name)}</span>
-                <span class="status-badge ${statusClass}">${statusText}</span>
+                <span class="card-name">📌 ${escapeHtml(paste.name)}</span>
+                <span class="status ${statusClass}">${statusText}</span>
             </div>
-            <div class="url-box">
-                <div>🔗 <a href="${escapeHtml(paste.url)}" target="_blank" rel="noopener">${truncateUrl(paste.url, 70)}</a></div>
-                <div style="font-size:0.65rem; margin-top:4px;">📡 RAW: <a href="${escapeHtml(paste.rawUrl)}" target="_blank">${truncateUrl(paste.rawUrl, 65)}</a></div>
+            <div class="url-block">
+                <a href="${escapeHtml(paste.url)}" target="_blank" rel="noopener">${truncate(paste.url, 70)}</a>
+                <div style="font-size:0.6rem; margin-top:4px;">raw: <a href="${escapeHtml(paste.raw)}" target="_blank">${truncate(paste.raw, 65)}</a></div>
             </div>
-            <div class="raw-preview ${borderClass}">
-                ${rawPreviewHtml}
+            <div class="content-preview">
+                ${previewHtml}
             </div>
             <div class="card-footer">
-                <span>🕘 last check: ${data.timestamp ? formatTime(data.timestamp) : "--"}</span>
-                <span class="http-code">${httpDisplay}</span>
+                <div class="timestamp-info">
+                    <span>🕒 pertama dipantau: ${firstSeenStr}</span>
+                    ${lostInfoHtml}
+                </div>
+                <span class="http-code" style="background:#f1f5f9; padding:2px 8px; border-radius:30px;">${httpDisplay}</span>
             </div>
         </div>`;
     }
-    
-    document.getElementById("cardsGrid").innerHTML = gridHtml;
-    updateStatsUI();
-}
-
-function updateStatsUI() {
-    let valid = 0, invalid = 0;
-    for (let p of PASTE_LIST) {
-        const d = store.get(p.name);
-        if (d?.status === "valid") valid++;
-        else if (d?.status === "invalid") invalid++;
-    }
-    document.getElementById("validCount").innerText = valid;
-    document.getElementById("invalidCount").innerText = invalid;
-    document.getElementById("totalCount").innerText = PASTE_LIST.length;
+    document.getElementById("cardsGrid").innerHTML = html;
 }
 
 function formatTime(date) {
     if (!date) return "--";
-    return date.toLocaleTimeString('id-ID', { hour12: false });
+    return date.toLocaleString('id-ID', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12: false });
 }
 
-function truncateUrl(str, max) {
+function truncate(str, maxLen) {
     if (!str) return "";
-    if (str.length <= max) return str;
-    return str.slice(0, max-3) + "...";
+    if (str.length <= maxLen) return str;
+    return str.slice(0, maxLen-3) + "...";
 }
 
 function escapeHtml(str) {
@@ -516,60 +647,29 @@ function escapeHtml(str) {
     });
 }
 
-// update jam & uptime
-function updateClockAndUptime() {
-    const now = new Date();
-    document.getElementById("liveClock").innerHTML = now.toLocaleTimeString('id-ID', { hour12: false });
-    const diffSec = (now - START_TIME) / 1000;
-    if (diffSec >= 0) {
-        const days = Math.floor(diffSec / 86400);
-        const hours = Math.floor((diffSec % 86400) / 3600);
-        const mins = Math.floor((diffSec % 3600) / 60);
-        document.getElementById("uptimeText").innerHTML = `${days}d ${hours}h ${mins}m`;
-    } else {
-        document.getElementById("uptimeText").innerHTML = "0d 0h 0m";
-    }
+// update jam & uptime secara realtime tiap detik (tanpa auto refresh data)
+function updateClockAndUptimeOnly() {
+    const nowDate = new Date();
+    const elapsed = (nowDate - START_DATE) / 1000;
+    const uptimeStr = formatUptimeDetailed(elapsed);
+    const uptimeElem = document.getElementById("uptimeDetail");
+    if (uptimeElem) uptimeElem.innerHTML = uptimeStr;
 }
+setInterval(updateClockAndUptimeOnly, 1000);
 
-// auto refresh setiap 20 DETIK (update konten asli)
-let autoRefreshInterval = null;
-let isRefreshing = false;
-
-async function startAutoRefresh() {
-    if (autoRefreshInterval) clearInterval(autoRefreshInterval);
-    
-    // pertama langsung refresh
-    if (!isRefreshing) {
-        isRefreshing = true;
-        await refreshAllPastes();
-        isRefreshing = false;
-    }
-    
-    autoRefreshInterval = setInterval(async () => {
-        if (!isRefreshing) {
-            isRefreshing = true;
-            document.getElementById("autoStatusText").innerHTML = "⟳ auto-refresh berjalan...";
-            await refreshAllPastes();
-            document.getElementById("autoStatusText").innerHTML = "● auto-refresh aktif (20s)";
-            isRefreshing = false;
-        }
-    }, 20000);
-}
-
-// manual refresh button
-document.getElementById("forceRefreshBtn").addEventListener("click", async () => {
-    if (isRefreshing) return;
-    isRefreshing = true;
-    document.getElementById("forceRefreshBtn").innerText = "⟳ MENGECEK...";
-    await refreshAllPastes();
-    document.getElementById("forceRefreshBtn").innerText = "⟳ FORCE UPDATE";
-    isRefreshing = false;
+// manual refresh (cek semua parallel)
+document.getElementById("manualRefreshBtn").addEventListener("click", async () => {
+    const btn = document.getElementById("manualRefreshBtn");
+    btn.innerText = "⟳ mengecek...";
+    btn.disabled = true;
+    await checkAllPastes();
+    btn.innerText = "⟳ cek sekarang";
+    btn.disabled = false;
 });
 
-// inisialisasi
-setInterval(updateClockAndUptime, 1000);
-updateClockAndUptime();
-startAutoRefresh();
+// initial check (parallel all)
+checkAllPastes();
+updateClockAndUptimeOnly();
 </script>
 </body>
 </html>
