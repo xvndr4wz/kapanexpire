@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pulse · Paste Monitor</title>
+<title>Pulse · Paste Monitor (RAW Only)</title>
 <style>
 * {
     margin: 0;
@@ -23,7 +23,6 @@ body {
     margin: 0 auto;
 }
 
-/* header minimal */
 .header {
     margin-bottom: 32px;
 }
@@ -45,7 +44,6 @@ h1 {
     margin-left: 12px;
 }
 
-/* stats row */
 .stats-row {
     display: flex;
     gap: 16px;
@@ -81,7 +79,6 @@ h1 {
 .stat-card.valid .value { color: #10b981; }
 .stat-card.invalid .value { color: #ef4444; }
 
-/* uptime panel khusus - format lengkap */
 .uptime-panel {
     background: white;
     border-radius: 20px;
@@ -129,7 +126,6 @@ h1 {
     transform: scale(0.97);
 }
 
-/* grid cards */
 .grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
@@ -203,7 +199,6 @@ h1 {
     text-decoration: underline;
 }
 
-/* konten preview */
 .content-preview {
     padding: 14px 18px;
     background: #fefefe;
@@ -287,11 +282,6 @@ footer {
     font-size: 0.7rem;
     color: #8ba0bc;
 }
-
-.empty-content {
-    color: #a0bbd9;
-    font-style: italic;
-}
 </style>
 </head>
 <body>
@@ -300,7 +290,7 @@ footer {
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
             <div>
                 <h1>pulse monitor</h1>
-                <span class="badge-sub">cek konten asli · created at</span>
+                <span class="badge-sub">RAW only · cek "CREATED AT"</span>
             </div>
             <button class="refresh-btn" id="manualRefreshBtn">⟳ cek sekarang</button>
         </div>
@@ -321,35 +311,32 @@ footer {
         </div>
     </div>
 
-    <!-- uptime lengkap: detik | jam menit | hari jam | bulan hari | tahun bulan hari -->
     <div class="uptime-panel">
         <span class="uptime-title">📅 sejak 6 Juni 2026 · 17:30:46</span>
         <div class="uptime-value" id="uptimeDetail">--</div>
     </div>
 
     <div id="cardsGrid" class="grid"></div>
-    <footer>✓ pengecekan parallel (semua barengan) · tanpa auto refresh · klik tombol untuk update terbaru</footer>
+    <footer>✓ semua paste langsung RAW · fetch via proxy · deteksi "CREATED AT"</footer>
 </div>
 
 <script>
-// ======================== DAFTAR PASTE ========================
+// ======================== DAFTAR PASTE (RAW ONLY) ========================
 const PASTE_LIST = [
-    { name: "NEKOID.CC", url: "https://pb.nekoid.cc/uCbr", rawUrl: "https://pb.nekoid.cc/uCbr" },
-    { name: "PASTE.EE VIEW", url: "https://paste.ee/p/jDq3THqM", rawUrl: "https://paste.ee/r/jDq3THqM" },
-    { name: "PASTE.EE RAW", url: "https://paste.ee/r/jDq3THqM", rawUrl: "https://paste.ee/r/jDq3THqM" },
-    { name: "RUBIS VIEW", url: "https://rubis.app/view/?scrap=TdrQo24Kat2JpHz2", rawUrl: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
-    { name: "RUBIS RAW API", url: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw", rawUrl: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
-    { name: "PASTEFY", url: "https://pastefy.app/8uNFL4QZ/raw", rawUrl: "https://pastefy.app/8uNFL4QZ/raw" },
-    { name: "PASTE.RS", url: "https://paste.rs/gInQ0", rawUrl: "https://paste.rs/gInQ0" },
-    { name: "PASTEBIN", url: "https://pastebin.com/raw/inZGNrT4", rawUrl: "https://pastebin.com/raw/inZGNrT4" },
-    { name: "MYST PASTE", url: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4", rawUrl: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4" },
-    { name: "BASEDBIN", url: "https://basedbin.fly.dev/sTIYAV", rawUrl: "https://basedbin.fly.dev/sTIYAV" },
-    { name: "DPASTE", url: "https://dpaste.com/CYSYJERKM.txt", rawUrl: "https://dpaste.com/CYSYJERKM.txt" },
-    { name: "PASTE-BIN.XYZ", url: "https://paste-bin.xyz/raw/NRE5c667", rawUrl: "https://paste-bin.xyz/raw/NRE5c667" },
-    { name: "HST.SH", url: "https://hst.sh/raw/iqahiluzev", rawUrl: "https://hst.sh/raw/iqahiluzev" },
-    { name: "HASTE.ZNEIX", url: "https://haste.zneix.eu/raw/opytesucux", rawUrl: "https://haste.zneix.eu/raw/opytesucux" },
-    { name: "SOURCEB.IN", url: "https://cdn.sourceb.in/bins/hw37mRWTu1/0", rawUrl: "https://cdn.sourceb.in/bins/hw37mRWTu1/0" },
-    { name: "P.IP.FI", url: "https://p.ip.fi/2JWL.txt", rawUrl: "https://p.ip.fi/2JWL.txt" }
+    { name: "NEKOID.CC", rawUrl: "https://pb.nekoid.cc/uCbr" },
+    { name: "PASTE.EE", rawUrl: "https://paste.ee/r/jDq3THqM" },
+    { name: "RUBIS", rawUrl: "https://api.rubis.app/v2/scrap/TdrQo24Kat2JpHz2/raw" },
+    { name: "PASTEFY", rawUrl: "https://pastefy.app/8uNFL4QZ/raw" },
+    { name: "PASTE.RS", rawUrl: "https://paste.rs/gInQ0" },
+    { name: "PASTEBIN", rawUrl: "https://pastebin.com/raw/inZGNrT4" },
+    { name: "MYST", rawUrl: "https://paste.myst.rs/raw/xg15v6li/xf6jevi4" },
+    { name: "BASEDBIN", rawUrl: "https://basedbin.fly.dev/sTIYAV" },
+    { name: "DPASTE", rawUrl: "https://dpaste.com/CYSYJERKM.txt" },
+    { name: "PASTE-BIN.XYZ", rawUrl: "https://paste-bin.xyz/raw/NRE5c667" },
+    { name: "HST.SH", rawUrl: "https://hst.sh/raw/iqahiluzev" },
+    { name: "HASTE.ZNEIX", rawUrl: "https://haste.zneix.eu/raw/opytesucux" },
+    { name: "SOURCEB.IN", rawUrl: "https://cdn.sourceb.in/bins/hw37mRWTu1/0" },
+    { name: "P.IP.FI", rawUrl: "https://p.ip.fi/2JWL.txt" }
 ];
 
 const START_DATE = new Date("2026-06-06T17:30:46+07:00");
@@ -371,8 +358,9 @@ for (let p of PASTE_LIST) {
     });
 }
 
-// ========== FETCH PAKAI CORS PROXY (sama seperti yang work) ==========
+// ========== FETCH DENGAN PROXY + USER-AGENT (atasi 403) ==========
 async function fetchRawWithProxy(rawUrl) {
+    // pakai corsproxy.io dengan tambahan header user-agent
     const proxyUrl = `https://corsproxy.io/?${encodeURIComponent(rawUrl)}`;
     try {
         const controller = new AbortController();
@@ -380,7 +368,10 @@ async function fetchRawWithProxy(rawUrl) {
         const response = await fetch(proxyUrl, {
             method: "GET",
             signal: controller.signal,
-            headers: { "Cache-Control": "no-cache, no-store" }
+            headers: {
+                "Cache-Control": "no-cache, no-store",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
         });
         clearTimeout(timeoutId);
         
@@ -410,7 +401,7 @@ function getPreview(content, hasCreatedAt) {
     return `❌ TIDAK ADA "CREATED AT" — ${snippet}`;
 }
 
-// PENGECEKAN PARALLEL SEMUA (cepat!)
+// PENGECEKAN PARALLEL SEMUA
 async function checkAllPastes() {
     // Set status checking
     for (let p of PASTE_LIST) {
@@ -474,7 +465,7 @@ async function checkAllPastes() {
     renderDashboard();
 }
 
-// ========== FORMAT UPTIME LENGKAP (sesuai permintaan) ==========
+// ========== FORMAT UPTIME LENGKAP ==========
 function formatUptimeDetailed(seconds) {
     if (seconds < 0) seconds = 0;
     
@@ -485,7 +476,6 @@ function formatUptimeDetailed(seconds) {
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
     
-    // Format: menit detik | jam + menit | hari + jam | bulan + hari | tahun + bulan + hari
     let parts = [];
     parts.push(`${minutes} menit ${secs} detik`);
     parts.push(`${hours} jam ${minutes} menit`);
@@ -496,7 +486,6 @@ function formatUptimeDetailed(seconds) {
     return parts.join(' | ');
 }
 
-// Hitung "hilang dari kapan"
 function getLostSinceText(lastValidDate) {
     if (!lastValidDate) return null;
     const now = new Date();
@@ -516,7 +505,6 @@ function getLostSinceText(lastValidDate) {
     return `${diffYear} tahun ${diffMonth % 12} bulan ${diffDay % 30} hari lalu`;
 }
 
-// render UI
 function renderDashboard() {
     // update stat
     let validTotal = 0, invalidTotal = 0;
@@ -593,8 +581,7 @@ function renderDashboard() {
                 <span class="status ${statusClass}">${statusText}</span>
             </div>
             <div class="url-block">
-                <a href="${escapeHtml(paste.url)}" target="_blank" rel="noopener">${truncate(paste.url, 70)}</a>
-                <div style="font-size:0.6rem; margin-top:4px;">raw: <a href="${escapeHtml(paste.rawUrl)}" target="_blank">${truncate(paste.rawUrl, 65)}</a></div>
+                <a href="${escapeHtml(paste.rawUrl)}" target="_blank" rel="noopener">${truncate(paste.rawUrl, 75)}</a>
             </div>
             <div class="content-preview">
                 ${previewHtml}
@@ -632,7 +619,7 @@ function escapeHtml(str) {
     });
 }
 
-// update uptime tiap detik (tanpa refresh data)
+// update uptime tiap detik
 function updateUptimeOnly() {
     const now = new Date();
     const elapsed = (now - START_DATE) / 1000;
@@ -641,7 +628,7 @@ function updateUptimeOnly() {
 }
 setInterval(updateUptimeOnly, 1000);
 
-// manual refresh (parallel semua)
+// manual refresh
 document.getElementById("manualRefreshBtn").addEventListener("click", async () => {
     const btn = document.getElementById("manualRefreshBtn");
     btn.innerText = "⟳ mengecek...";
