@@ -174,6 +174,10 @@ body::before {
   background:var(--surface2); color:var(--text-muted); border:1px solid var(--border);
   white-space:nowrap; flex-shrink:0;
 }
+.proxy-tag {
+  font-family:var(--mono); font-size:.55rem; color:var(--text-muted);
+  margin-top:2px; opacity:.6;
+}
 .page-footer { text-align:center; margin-top:56px; font-family:var(--mono); font-size:.62rem; color:var(--text-muted); letter-spacing:.04em; }
 </style>
 </head>
@@ -256,44 +260,53 @@ const PASTE_LIST = [
   { name: "TEST",        rawUrl: "https://pastefy.app/ExZW8o4g/raw" },
 ];
 
-// WEBHOOK DISCORD (isi dengan punya kamu)
+// WEBHOOK DISCORD
 const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1512798536364982362/x6ARE3230z9wcqCwdAAQ_iEEdBLFQRUkUDSf21OQVqXRlVvTdTmaUEZP6FLQBZL1fpuF";
 const START_DATE = new Date("2026-06-06T17:30:46+07:00");
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 15000;
 const AUTO_INTERVAL_MS = 5 * 60 * 1000;
 
-// STATE
-const store = new Map();
-const notifiedInvalid = new Set();
-const alertLog = [];
+// USER AGENT YANG AKAN DIKIRIM VIA PROXY
+const USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36 Edg/148.0.0.0";
 
-// INIT STORE
-for (const p of PASTE_LIST) {
-  store.set(p.name, {
-    status: 'checking',
-    httpCode: null,
-    snippet: null,
-    hasCreatedAt: false,
-    firstSeen: new Date(),
-    lastValid: null,
-    lastCheck: null,
-    errorMsg: null
-  });
+// PROXY LIST YANG SUPPORT CUSTOM HEADERS
+function getProxies(rawUrl) {
+  const encodedUrl = encodeURIComponent(rawUrl);
+  return [
+    // allorigins - support custom UA via header
+    `https://api.allorigins.win/raw?url=${encodedUrl}`,
+    // corsproxy.io - support custom UA
+    `https://corsproxy.io/?${encodedUrl}`,
+    // cors-anywhere with UA support
+    `https://cors-anywhere.herokuapp.com/${rawUrl}`,
+    // proxy.cors.sh (reliable)
+    `https://proxy.cors.sh/${rawUrl}`,
+    // codeberg mirror
+    `https://codeberg.org/api/cors-proxy?url=${encodedUrl}`
+  ];
 }
 
-// FETCH RAW LANGSUNG (tanpa proxy)
-async function fetchRawDirect(rawUrl) {
+// FETCH DENGAN PROXY + CUSTOM HEADER
+async function fetchWithProxy(proxyUrl, originalUrl) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
   
   try {
-    const response = await fetch(rawUrl, {
+    // Untuk proxy tertentu, kita kirim User-Agent via header
+    const headers = {
+      'User-Agent': USER_AGENT,
+      'Cache-Control': 'no-cache, no-store'
+    };
+    
+    // Khusus untuk proxy.cors.sh butuh origin header
+    if (proxyUrl.includes('proxy.cors.sh')) {
+      headers['Origin'] = new URL(originalUrl).origin;
+    }
+    
+    const response = await fetch(proxyUrl, {
       signal: controller.signal,
-      mode: 'cors', // default, coba dulu
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache'
-      }
+      headers: headers,
+      cache: 'no-store'
     });
     
     clearTimeout(timeoutId);
@@ -303,19 +316,76 @@ async function fetchRawDirect(rawUrl) {
     }
     
     const text = await response.text();
+    
+    // Cek apakah proxy return HTML error
+    if (text.trim().startsWith('<!DOCTYPE') || 
+        text.trim().startsWith('<html') || 
+        text.includes('Access Denied') ||
+        text.includes('502 Bad Gateway') ||
+        text.length < 10) {
+      return { ok: false, status: 0, content: null, error: 'Proxy returned error page' };
+    }
+    
     return { ok: true, status: response.status, content: text, error: null };
     
   } catch (err) {
     clearTimeout(timeoutId);
-    let errorMsg = err.name === 'AbortError' ? 'Timeout (10 detik)' : err.message;
-    
-    // CORS error detection
-    if (errorMsg.includes('Failed to fetch') || errorMsg.includes('NetworkError')) {
-      errorMsg = 'CORS blocked / Network error';
-    }
-    
+    let errorMsg = err.name === 'AbortError' ? 'Timeout' : err.message;
     return { ok: false, status: 0, content: null, error: errorMsg };
   }
+}
+
+// FETCH RAW DENGAN MULTIPLE PROXY
+async function fetchRawWithFallback(rawUrl) {
+  const proxies = getProxies(rawUrl);
+  let errors = [];
+  
+  for (let i = 0; i < proxies.length; i++) {
+    const result = await fetchWithProxy(proxies[i], rawUrl);
+    if (result.ok && result.content && result.content.length > 10) {
+      return { ...result, proxyIndex: i };
+    }
+    errors.push(`Proxy ${i+1}: ${result.error || 'Failed'}`);
+    // Delay antar proxy biar gak terlalu heavy
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+  
+  return { ok: false, status: 0, content: null, error: errors.join(' | '), proxyIndex: -1 };
+}
+
+// FALLBACK: coba langsung tanpa proxy (untuk yang support CORS)
+async function fetchDirect(rawUrl) {
+  try {
+    const response = await fetch(rawUrl, {
+      mode: 'cors',
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache'
+      }
+    });
+    if (response.ok) {
+      const text = await response.text();
+      if (text && text.length > 10 && !text.includes('<!DOCTYPE')) {
+        return { ok: true, status: response.status, content: text, error: null, proxyIndex: -1 };
+      }
+    }
+    return { ok: false, status: response.status, content: null, error: 'Direct fetch failed', proxyIndex: -1 };
+  } catch (err) {
+    return { ok: false, status: 0, content: null, error: err.message, proxyIndex: -1 };
+  }
+}
+
+// MAIN FETCH FUNCTION
+async function fetchRawContent(rawUrl) {
+  // Coba direct dulu untuk yang support CORS (seperti pastefy)
+  const directResult = await fetchDirect(rawUrl);
+  if (directResult.ok) {
+    return directResult;
+  }
+  
+  // Kalau gagal, coba pakai proxy dengan User-Agent
+  const proxyResult = await fetchRawWithFallback(rawUrl);
+  return proxyResult;
 }
 
 // DETEKSI KEYWORD
@@ -331,6 +401,24 @@ function getPreview(content, hasCA) {
     ? content.substring(0, 200).replace(/\n/g, '↵ ') + "…" 
     : content.replace(/\n/g, '↵ ');
   return hasCA ? `✅ DITEMUKAN "CREATED AT" — ${preview}` : `❌ TIDAK ADA "CREATED AT" — ${preview}`;
+}
+
+// STATE
+const store = new Map();
+const notifiedInvalid = new Set();
+const alertLog = [];
+
+for (const p of PASTE_LIST) {
+  store.set(p.name, {
+    status: 'checking',
+    httpCode: null,
+    snippet: null,
+    hasCreatedAt: false,
+    firstSeen: new Date(),
+    lastValid: null,
+    lastCheck: null,
+    errorMsg: null
+  });
 }
 
 // DISCORD WEBHOOK
@@ -382,7 +470,7 @@ function setWhStatus(state, text) {
 }
 
 function pushAlertLog(paste, expiredAt, httpCode, sent) {
-  alertLog.unshift({ paste, expiredAt, httpCode, sent, timestamp: new Date() });
+  alertLog.unshift({ paste, expiredAt, httpCode, sent });
   if (alertLog.length > 50) alertLog.pop();
   renderAlertLog();
 }
@@ -411,7 +499,6 @@ function renderAlertLog() {
 
 // CHECK ALL PASTES
 async function checkAllPastes() {
-  // Set ke checking
   for (const p of PASTE_LIST) {
     const old = store.get(p.name);
     store.set(p.name, { ...old, status: 'checking', lastCheck: new Date() });
@@ -419,7 +506,7 @@ async function checkAllPastes() {
   render();
 
   const promises = PASTE_LIST.map(async (paste) => {
-    const result = await fetchRawDirect(paste.rawUrl);
+    const result = await fetchRawContent(paste.rawUrl);
     const nowTime = new Date();
     const hasCA = result.ok && result.content ? hasCreatedAtKeyword(result.content) : false;
     const isValid = hasCA && result.ok;
@@ -440,7 +527,6 @@ async function checkAllPastes() {
       lastCheck: nowTime
     });
 
-    // Kirim notifikasi jika valid → invalid
     if (wasValid && !isValid && !notifiedInvalid.has(paste.name)) {
       notifiedInvalid.add(paste.name);
       await sendDiscordWebhook(paste, nowTime, result.status || 0);
@@ -475,6 +561,7 @@ function render() {
   document.getElementById('invalidCount').textContent = invalid;
 
   let html = '';
+  const proxyNames = ['Direct', 'allorigins', 'corsproxy.io', 'cors-anywhere', 'proxy.cors.sh', 'codeberg'];
   
   for (const paste of PASTE_LIST) {
     const d = store.get(paste.name);
@@ -489,7 +576,7 @@ function render() {
     let badgeHtml = '';
     if (!isChecking) {
       if (isValid) {
-        badgeHtml = `<span class="badge green">✓ created at found</span>`;
+        badgeHtml = `<span class="badge green">✓ "CREATED AT" found</span>`;
       } else if (d.httpCode === 200 && !d.hasCreatedAt) {
         badgeHtml = `<span class="badge yellow">⚠ 200 OK · no "CREATED AT"</span>`;
       } else if (d.lastValid) {
